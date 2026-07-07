@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HR Dashboard — Internship Nomination System</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loginView" class="login-box">
+  <h2>HR Login</h2>
+  <p style="font-size:13px;color:var(--muted)">Enter the HR access code to view nominations.</p>
+  <div class="field">
+    <label>Access code</label>
+    <input type="password" id="loginCode" placeholder="Access code">
+  </div>
+  <button id="loginBtn" style="width:100%">Continue</button>
+  <div id="loginMsg" class="msg err" style="display:none"></div>
+</div>
+
+<div id="appView" style="display:none">
+  <header>
+    <h1>Internship Nomination System</h1>
+    <p>Royal Media Services Limited — HR &amp; Administration Dashboard</p>
+  </header>
+  <div class="wrap">
+
+    <div class="datebar" id="dateBar"></div>
+
+    <div class="card">
+      <h2>Overview</h2>
+      <div class="kpi-grid" id="kpiGrid"></div>
+    </div>
+
+    <div class="card">
+      <h2>Gender Split</h2>
+      <div id="genderBars"></div>
+    </div>
+
+    <div class="card">
+      <h2>Nominations by Department</h2>
+      <div id="deptBars"></div>
+    </div>
+
+    <div class="card">
+      <h2>Institutions</h2>
+      <div class="toolbar">
+        <span></span>
+        <button class="ghost" id="exportInstBtn">Export institution summary (CSV)</button>
+      </div>
+      <div class="tablewrap">
+        <table id="instTable">
+          <thead><tr>
+            <th>Institution</th><th>Officer</th><th>Contact</th><th>Students</th>
+            <th>Vernacular</th><th>Max 10</th><th>Min 4 Vern.</th><th>CVs</th><th>Interview Status</th><th></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="empty" id="instEmpty">No institutions submitted yet.</div>
+    </div>
+
+    <div class="card">
+      <h2>Master Nominations</h2>
+      <div class="toolbar">
+        <input type="text" id="searchBox" placeholder="Filter by name, institution, department...">
+        <button class="ghost" id="exportMasterBtn">Export consolidated list (CSV)</button>
+      </div>
+      <div class="tablewrap">
+        <table id="masterTable">
+          <thead><tr>
+            <th>#</th><th>Institution</th><th>Full Name</th><th>Gender</th><th>Department</th>
+            <th>Area of Interest</th><th>Vernacular</th><th>CV</th><th>Interview Outcome</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="empty" id="masterEmpty">No students nominated yet.</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let TOKEN = sessionStorage.getItem('hrToken') || '';
+const DEPT_ORDER = ["Radio (Digital & Programming)","TV Production","Digital","Editorial",
+  "Technical Site","Studio Technical Operations (STO)","ICT Services","Marketing","HR & Administration"];
+
+async function api(path, opts = {}) {
+  opts.headers = opts.headers || {};
+  if (TOKEN) opts.headers['Authorization'] = 'Bearer ' + TOKEN;
+  const res = await fetch('/api' + path, opts);
+  const isJson = (res.headers.get('content-type') || '').includes('application/json');
+  const body = isJson ? await res.json() : await res.text();
+  if (!res.ok) throw new Error((body && body.error) || 'Request failed');
+  return body;
+}
+
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+async function renderDateBar(meta) {
+  const now = new Date();
+  const deadline = new Date(meta.deadline + 'T23:59:59');
+  const daysLeft = Math.ceil((deadline - now) / 86400000);
+  let cls = 'ok';
+  if (daysLeft < 0) cls = 'late'; else if (daysLeft <= 5) cls = 'warn';
+  const label = daysLeft < 0 ? `${Math.abs(daysLeft)} day(s) past deadline` : `${daysLeft} day(s) remaining`;
+  document.getElementById('dateBar').innerHTML =
+    `<div><b>Nomination deadline:</b> ${fmtDate(meta.deadline)}</div>
+     <div><b>Interview date:</b> ${fmtDate(meta.interviewDate)}</div>
+     <div class="days ${cls}"><b>${label}</b></div>`;
+}
+
+async function loadAll() {
+  const [meta, dash, insts, students] = await Promise.all([
+    api('/meta'), api('/dashboard'), api('/institutions'), api('/students'),
+  ]);
+  renderDateBar(meta);
+  renderKpis(dash);
+  renderGender(dash);
+  renderDept(dash);
+  renderInstitutions(insts);
+  window._students = students;
+  renderMaster(students);
+}
+
+function renderKpis(d) {
+  document.getElementById('kpiGrid').innerHTML = `
+    <div class="kpi"><div class="num">${d.institutionsCount}</div><div class="lbl">Institutions submitted</div></div>
+    <div class="kpi"><div class="num">${d.studentsCount}</div><div class="lbl">Students nominated</div></div>
+    <div class="kpi"><div class="num">${d.vernacularCount}</div><div class="lbl">Vernacular placements</div></div>
+    <div class="kpi"><div class="num">${d.studentsCount ? Math.round(d.vernacularCount/d.studentsCount*100) : 0}%</div><div class="lbl">% vernacular</div></div>
+    <div class="kpi ${d.overLimitInstitutions?'flag-bad':''}"><div class="num">${d.overLimitInstitutions}</div><div class="lbl">Over 10-student limit</div></div>
+    <div class="kpi ${d.underVernacularInstitutions?'flag-bad':''}"><div class="num">${d.underVernacularInstitutions}</div><div class="lbl">Below 4-vernacular minimum</div></div>
+  `;
+}
+
+function renderGender(d) {
+  const { male, female } = d.genderSplit;
+  const max = Math.max(male, female, 1);
+  document.getElementById('genderBars').innerHTML = (male + female) ? `
+    <div class="bar-row"><div class="lbl">Male</div><div class="bar-track"><div class="bar-fill" style="width:${male/max*100}%"></div></div><div class="val">${male}</div></div>
+    <div class="bar-row"><div class="lbl">Female</div><div class="bar-track"><div class="bar-fill" style="width:${female/max*100}%"></div></div><div class="val">${female}</div></div>
+  ` : '<div class="empty">No data yet.</div>';
+}
+
+function renderDept(d) {
+  const counts = d.departmentCounts;
+  const max = Math.max(...counts.map(c => c.count), d.otherDepartmentCount || 0, 1);
+  let html = counts.map(c => `
+    <div class="bar-row"><div class="lbl">${c.name}</div><div class="bar-track"><div class="bar-fill" style="width:${c.count/max*100}%"></div></div><div class="val">${c.count}</div></div>
+  `).join('');
+  if (d.otherDepartmentCount > 0) {
+    html += `<div class="bar-row"><div class="lbl">Unrecognised / Other</div><div class="bar-track"><div class="bar-fill" style="width:${d.otherDepartmentCount/max*100}%;background:var(--red)"></div></div><div class="val">${d.otherDepartmentCount}</div></div>`;
+  }
+  document.getElementById('deptBars').innerHTML = d.studentsCount ? html : '<div class="empty">No data yet.</div>';
+}
+
+function renderInstitutions(insts) {
+  const body = document.querySelector('#instTable tbody');
+  body.innerHTML = '';
+  document.getElementById('instEmpty').style.display = insts.length ? 'none' : 'block';
+  document.getElementById('instTable').style.display = insts.length ? 'table' : 'none';
+  insts.forEach(r => {
+    const maxOk = r.students_count <= 10;
+    const vernOk = r.vernacular_count >= 4;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.name}</td>
+      <td>${r.officer_name || ''}</td>
+      <td>${r.officer_email || ''}${r.officer_phone ? '<br>'+r.officer_phone : ''}</td>
+      <td>${r.students_count} / 10</td>
+      <td>${r.vernacular_count} / 4</td>
+      <td><span class="badge ${maxOk?'yes':'no'}">${maxOk?'Yes':'No'}</span></td>
+      <td><span class="badge ${vernOk?'yes':'no'}">${vernOk?'Yes':'No'}</span></td>
+      <td>${r.cv_count} / ${r.students_count}</td>
+      <td></td>
+      <td><button class="danger" data-id="${r.id}">Remove</button></td>
+    `;
+    const sel = document.createElement('select');
+    ['Not Started','Invited','Interviewed','Selected','Not Selected'].forEach(opt => {
+      const o = document.createElement('option'); o.value = opt; o.textContent = opt;
+      if (r.interview_status === opt) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', async () => {
+      await api(`/institutions/${r.id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ interviewStatus: sel.value }),
+      });
+    });
+    tr.children[8].appendChild(sel);
+    tr.querySelector('button.danger').addEventListener('click', async () => {
+      if (confirm(`Remove all nominations for "${r.name}"? This cannot be undone.`)) {
+        await api(`/institutions/${r.id}`, { method: 'DELETE' });
+        loadAll();
+      }
+    });
+    body.appendChild(tr);
+  });
+}
+
+function renderMaster(students, filter) {
+  const term = (filter !== undefined ? filter : (document.getElementById('searchBox').value || '')).toLowerCase();
+  const filtered = students.filter(s => !term || [s.institution_name, s.full_name, s.department, s.area_of_interest, s.gender].join(' ').toLowerCase().includes(term));
+  const body = document.querySelector('#masterTable tbody');
+  body.innerHTML = '';
+  document.getElementById('masterEmpty').style.display = filtered.length ? 'none' : 'block';
+  document.getElementById('masterTable').style.display = filtered.length ? 'table' : 'none';
+  filtered.forEach((s, i) => {
+    const tr = document.createElement('tr');
+    const cv = s.has_cv ? `<a href="/api/students/${s.id}/cv?token=${encodeURIComponent(TOKEN)}" target="_blank">Download</a>` : '<span style="color:var(--muted)">None</span>';
+    tr.innerHTML = `<td>${i+1}</td><td>${s.institution_name}</td><td>${s.full_name}</td><td>${s.gender||''}</td>
+      <td>${s.department||''}</td><td>${s.area_of_interest||''}</td>
+      <td><span class="badge ${String(s.vernacular)==='true'?'yes':'no'}">${s.vernacular?'Yes':'No'}</span></td>
+      <td>${cv}</td><td></td>`;
+    const sel = document.createElement('select');
+    ['Pending','Shortlisted','Not Shortlisted'].forEach(opt => {
+      const o = document.createElement('option'); o.value = opt; o.textContent = opt;
+      if (s.interview_outcome === opt) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', () => api(`/students/${s.id}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ interviewOutcome: sel.value }),
+    }));
+    tr.children[8].appendChild(sel);
+    body.appendChild(tr);
+  });
+}
+
+document.getElementById('searchBox').addEventListener('input', () => renderMaster(window._students || []));
+document.getElementById('exportMasterBtn').addEventListener('click', () => {
+  window.open(`/api/export/students.csv?token=${encodeURIComponent(TOKEN)}`, '_blank');
+});
+document.getElementById('exportInstBtn').addEventListener('click', () => {
+  window.open(`/api/export/institutions.csv?token=${encodeURIComponent(TOKEN)}`, '_blank');
+});
+
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('loginCode').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+async function doLogin() {
+  const code = document.getElementById('loginCode').value;
+  try {
+    const result = await fetch('/api/auth', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: 'hr', code }),
+    }).then(r => r.json());
+    if (!result.token) throw new Error(result.error || 'Login failed');
+    TOKEN = result.token;
+    sessionStorage.setItem('hrToken', TOKEN);
+    await showApp();
+  } catch (e) {
+    const m = document.getElementById('loginMsg');
+    m.textContent = e.message;
+    m.style.display = 'block';
+  }
+}
+
+async function showApp() {
+  document.getElementById('loginView').style.display = 'none';
+  document.getElementById('appView').style.display = 'block';
+  await loadAll();
+}
+
+(async function init() {
+  if (TOKEN) {
+    try { await loadAll(); await showApp(); return; } catch (e) { sessionStorage.removeItem('hrToken'); TOKEN = ''; }
+  }
+})();
+</script>
+</body>
+</html>

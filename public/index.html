@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Internship Nomination — Royal Media Services</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loginView" class="login-box">
+  <h2>Placement Officer Login</h2>
+  <p style="font-size:13px;color:var(--muted)">Enter the access code given to you by Royal Media Services HR to submit your institution's nominations.</p>
+  <div class="field">
+    <label>Access code</label>
+    <input type="password" id="loginCode" placeholder="Access code">
+  </div>
+  <button id="loginBtn" style="width:100%">Continue</button>
+  <div id="loginMsg" class="msg err" style="display:none"></div>
+</div>
+
+<div id="appView" style="display:none">
+  <header>
+    <h1>Internship Nomination System</h1>
+    <p>Royal Media Services Limited — Placement Officer Submission</p>
+  </header>
+  <div class="wrap narrow">
+
+    <div class="datebar" id="dateBar"></div>
+
+    <div class="card">
+      <h2>Background</h2>
+      <p style="font-size:13px;line-height:1.6">
+        Royal Media Services Limited is preparing to onboard interns for the <b>September–December 2026 Internship
+        Cohort</b> under its structured internship programme. Submissions are made exclusively by authorised
+        Placement Officers or Internship Coordinators — students may not apply directly. Each institution may
+        nominate up to <b>10 students</b>, including at least <b>4 for vernacular media placements</b>, in one
+        consolidated submission on or before <b id="deadlineText">19th July 2026</b>. Interviews are scheduled
+        for <b id="interviewText">7th August 2026</b>.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Section A — Declaration</h2>
+      <div class="decl-row">
+        <span>1. The nominated students are final-year students requiring industrial attachment</span>
+        <select id="declFinalYear"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
+      </div>
+      <div class="decl-row">
+        <span>2. The students will be available for the full internship period (September–December 2026)</span>
+        <select id="declAvailability"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
+      </div>
+      <div class="decl-row">
+        <span>3. The student is aware and understands that this is an unpaid internship</span>
+        <select id="declUnpaid"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Section B — Placement Officer &amp; Institution Details</h2>
+      <div class="grid2">
+        <div class="field"><label>Placement Officer Name *</label><input type="text" id="officerName"></div>
+        <div class="field"><label>Name of Institution *</label><input type="text" id="institutionName"></div>
+        <div class="field"><label>Placement Officer Email / Alternative Email</label><input type="email" id="officerEmail"></div>
+        <div class="field"><label>Placement Officer Phone / Alternative Number</label><input type="tel" id="officerPhone"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Section C — Student Nominations</h2>
+      <p style="font-size:12.5px;color:var(--muted)">Maximum 10 students; minimum 4 for vernacular media placements. Attach a CV (PDF or Word, max <span id="maxCvSize">5</span>MB) for each student if available.</p>
+      <div id="studentsContainer"></div>
+      <button class="ghost" id="addStudentBtn" type="button">+ Add another student</button>
+
+      <div class="summary-box">
+        <div class="item"><b id="sumTotal">0</b><span>Students nominated</span></div>
+        <div class="item"><b id="sumVern">0</b><span>Vernacular placements</span></div>
+        <div class="item"><span id="sumStatus" class="status-pill bad">Add students to begin</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Section D — Final Declaration</h2>
+      <div class="decl-row">
+        <span>1. The nominated students are final-year students requiring industrial attachment</span>
+        <select id="declFinalYear2"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
+      </div>
+      <div class="decl-row">
+        <span>2. The students will be available for the full internship period (September–December 2026)</span>
+        <select id="declAvailability2"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
+      </div>
+      <div class="decl-row">
+        <span>3. The institution has not nominated more than ten (10) students — verified automatically</span>
+        <span id="autoCompliance" class="badge no">No</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <button id="submitBtn" style="width:100%">Submit Nomination</button>
+      <div id="submitMsg" class="msg" style="display:none"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let TOKEN = sessionStorage.getItem('officerToken') || '';
+let META = null;
+let studentCount = 0;
+const MAX_STUDENTS = 10;
+
+async function api(path, opts = {}) {
+  opts.headers = opts.headers || {};
+  if (TOKEN) opts.headers['Authorization'] = 'Bearer ' + TOKEN;
+  const res = await fetch('/api' + path, opts);
+  const isJson = (res.headers.get('content-type') || '').includes('application/json');
+  const body = isJson ? await res.json() : await res.text();
+  if (!res.ok) throw new Error((body && body.error) || 'Request failed');
+  return body;
+}
+
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+async function loadMeta() {
+  META = await api('/meta');
+  document.getElementById('deadlineText').textContent = fmtDate(META.deadline);
+  document.getElementById('interviewText').textContent = fmtDate(META.interviewDate);
+  document.getElementById('maxCvSize').textContent = META.maxCvSizeMb;
+  const now = new Date();
+  const deadline = new Date(META.deadline + 'T23:59:59');
+  const daysLeft = Math.ceil((deadline - now) / 86400000);
+  let cls = 'ok';
+  if (daysLeft < 0) cls = 'late'; else if (daysLeft <= 5) cls = 'warn';
+  const label = daysLeft < 0 ? `${Math.abs(daysLeft)} day(s) past deadline` : `${daysLeft} day(s) remaining`;
+  document.getElementById('dateBar').innerHTML =
+    `<div><b>Nomination deadline:</b> ${fmtDate(META.deadline)}</div>
+     <div><b>Interview date:</b> ${fmtDate(META.interviewDate)}</div>
+     <div class="days ${cls}"><b>${label}</b></div>`;
+}
+
+function studentCardHtml(index) {
+  const deptOptions = META.departments.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
+  return `
+  <div class="student-card" data-index="${index}">
+    <span class="num">Student ${index + 1}</span>
+    <button type="button" class="danger remove-btn" onclick="removeStudent(${index})">Remove</button>
+    <div class="grid2">
+      <div class="field"><label>Full Name *</label><input type="text" class="s-name"></div>
+      <div class="field"><label>Gender *</label>
+        <select class="s-gender"><option value="">Select</option><option>Male</option><option>Female</option></select>
+      </div>
+      <div class="field"><label>National ID Number</label><input type="text" class="s-nid"></div>
+      <div class="field"><label>Phone Number</label><input type="tel" class="s-phone"></div>
+      <div class="field"><label>Email Address</label><input type="email" class="s-email"></div>
+      <div class="field"><label>Year of Study</label><input type="text" class="s-year" placeholder="e.g. 4"></div>
+      <div class="field"><label>Department *</label>
+        <select class="s-dept" onchange="onDeptChange(${index})"><option value="">Select department</option>${deptOptions}</select>
+      </div>
+      <div class="field"><label>Area of Interest *</label>
+        <select class="s-area"><option value="">Select department first</option></select>
+      </div>
+      <div class="field"><label>Vernacular Placement?</label>
+        <select class="s-vern"><option value="No">No</option><option value="Yes">Yes</option></select>
+      </div>
+      <div class="field"><label>CV (PDF or Word)</label><input type="file" class="s-cv" accept=".pdf,.doc,.docx"></div>
+    </div>
+  </div>`;
+}
+
+function onDeptChange(index) {
+  const card = document.querySelector(`.student-card[data-index="${index}"]`);
+  const deptVal = card.querySelector('.s-dept').value;
+  const areaSel = card.querySelector('.s-area');
+  const dept = META.departments.find(d => d.name === deptVal);
+  areaSel.innerHTML = dept
+    ? '<option value="">Select area</option>' + dept.areas.map(a => `<option>${a}</option>`).join('')
+    : '<option value="">Select department first</option>';
+}
+
+function addStudent() {
+  if (studentCount >= MAX_STUDENTS) return;
+  const container = document.getElementById('studentsContainer');
+  const div = document.createElement('div');
+  div.innerHTML = studentCardHtml(studentCount);
+  container.appendChild(div.firstElementChild);
+  studentCount++;
+  updateSummary();
+  document.getElementById('addStudentBtn').disabled = studentCount >= MAX_STUDENTS;
+}
+
+function removeStudent(index) {
+  const card = document.querySelector(`.student-card[data-index="${index}"]`);
+  if (card) card.remove();
+  updateSummary();
+  document.getElementById('addStudentBtn').disabled = document.querySelectorAll('.student-card').length >= MAX_STUDENTS;
+}
+
+function collectStudents() {
+  return Array.from(document.querySelectorAll('.student-card')).map(card => ({
+    name: card.querySelector('.s-name').value.trim(),
+    gender: card.querySelector('.s-gender').value,
+    nationalId: card.querySelector('.s-nid').value.trim(),
+    phone: card.querySelector('.s-phone').value.trim(),
+    email: card.querySelector('.s-email').value.trim(),
+    year: card.querySelector('.s-year').value.trim(),
+    department: card.querySelector('.s-dept').value,
+    area: card.querySelector('.s-area').value,
+    vernacular: card.querySelector('.s-vern').value,
+    cvInput: card.querySelector('.s-cv'),
+  })).filter(s => s.name);
+}
+
+function updateSummary() {
+  const students = collectStudents();
+  const total = students.length;
+  const vern = students.filter(s => s.vernacular === 'Yes').length;
+  document.getElementById('sumTotal').textContent = total;
+  document.getElementById('sumVern').textContent = vern;
+  const pill = document.getElementById('sumStatus');
+  const compliant = total > 0 && total <= 10 && vern >= 4;
+  pill.textContent = total === 0 ? 'Add students to begin'
+    : compliant ? 'Ready to submit'
+    : total > 10 ? 'Exceeds 10-student limit'
+    : 'Below 4-student vernacular minimum';
+  pill.className = 'status-pill ' + (compliant ? 'ok' : 'bad');
+  const autoBadge = document.getElementById('autoCompliance');
+  const maxOk = total <= 10;
+  autoBadge.textContent = maxOk ? 'Yes' : 'No';
+  autoBadge.className = 'badge ' + (maxOk ? 'yes' : 'no');
+}
+
+document.getElementById('addStudentBtn').addEventListener('click', addStudent);
+document.getElementById('studentsContainer').addEventListener('input', updateSummary);
+document.getElementById('studentsContainer').addEventListener('change', updateSummary);
+
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  const msg = document.getElementById('submitMsg');
+  msg.style.display = 'none';
+  const students = collectStudents();
+  if (!document.getElementById('institutionName').value.trim()) {
+    return showMsg('Name of institution is required.', false);
+  }
+  if (!document.getElementById('officerName').value.trim()) {
+    return showMsg('Placement officer name is required.', false);
+  }
+  if (students.length === 0) return showMsg('Add at least one student.', false);
+  if (students.length > 10) return showMsg('A maximum of 10 students may be nominated.', false);
+
+  const fd = new FormData();
+  fd.append('officerName', document.getElementById('officerName').value.trim());
+  fd.append('institutionName', document.getElementById('institutionName').value.trim());
+  fd.append('officerEmail', document.getElementById('officerEmail').value.trim());
+  fd.append('officerPhone', document.getElementById('officerPhone').value.trim());
+  fd.append('declarationFinalYear', document.getElementById('declFinalYear2').value || document.getElementById('declFinalYear').value);
+  fd.append('declarationAvailability', document.getElementById('declAvailability2').value || document.getElementById('declAvailability').value);
+  fd.append('declarationUnpaid', document.getElementById('declUnpaid').value);
+
+  const studentsPayload = students.map(({ cvInput, ...rest }) => rest);
+  fd.append('studentsJson', JSON.stringify(studentsPayload));
+  students.forEach((s, i) => {
+    if (s.cvInput.files[0]) fd.append(`cv_${i}`, s.cvInput.files[0]);
+  });
+
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('submitBtn').textContent = 'Submitting...';
+  try {
+    const result = await api('/nominations', { method: 'POST', body: fd });
+    showMsg(`Submitted successfully. ${result.studentsCount} student(s) recorded` +
+      (result.vernacularCompliant ? '' : ' — note: fewer than 4 vernacular placements were nominated.'), true);
+  } catch (e) {
+    showMsg(e.message, false);
+  } finally {
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('submitBtn').textContent = 'Submit Nomination';
+  }
+});
+
+function showMsg(text, ok) {
+  const msg = document.getElementById('submitMsg');
+  msg.textContent = text;
+  msg.className = 'msg ' + (ok ? 'ok' : 'err');
+  msg.style.display = 'block';
+  msg.scrollIntoView({ behavior: 'smooth' });
+}
+
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('loginCode').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+async function doLogin() {
+  const code = document.getElementById('loginCode').value;
+  try {
+    const result = await fetch('/api/auth', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: 'officer', code }),
+    }).then(r => r.json());
+    if (!result.token) throw new Error(result.error || 'Login failed');
+    TOKEN = result.token;
+    sessionStorage.setItem('officerToken', TOKEN);
+    await showApp();
+  } catch (e) {
+    const m = document.getElementById('loginMsg');
+    m.textContent = e.message;
+    m.style.display = 'block';
+  }
+}
+
+async function showApp() {
+  document.getElementById('loginView').style.display = 'none';
+  document.getElementById('appView').style.display = 'block';
+  await loadMeta();
+  addStudent();
+}
+
+(async function init() {
+  if (TOKEN) {
+    try { await loadMeta(); await showApp(); return; } catch (e) { sessionStorage.removeItem('officerToken'); TOKEN = ''; }
+  }
+})();
+</script>
+</body>
+</html>

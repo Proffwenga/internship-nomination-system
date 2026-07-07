@@ -1,0 +1,17 @@
+{
+  "name": "internship-nomination-system",
+  "version": "1.0.0",
+  "description": "Royal Media Services internship nomination system - web form plus cloud database and CV attachments.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "migrate": "node migrate.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^2.0.0",
+    "pg": "^8.11.5",
+    "jsonwebtoken": "^9.0.2",
+    "dotenv": "^16.4.5"
+  }
+}
