@@ -1,6 +1,3 @@
-// Single source of truth for departments/areas — used by the API (validation,
-// /api/meta) and referenced by the frontend via that endpoint so the list
-// only needs to be maintained in one place.
 module.exports = [
   { name: "Radio (Digital & Programming)", areas: [
     "Ramogi FM","Inooro FM","Musyi FM","Chamgei FM","Muuga FM","Egesa FM",

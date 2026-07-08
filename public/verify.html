@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verify Email — Internship Nomination System</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="login-box">
+  <h2>Email Verification</h2>
+  <div id="statusMsg" class="msg" style="display:block">Verifying your email address...</div>
+  <div id="loginLink" class="link-row" style="display:none">
+    <a href="index.html">Go to login</a>
+  </div>
+</div>
+<script>
+(async function () {
+  const params = new URLSearchParams(location.search);
+  const token = params.get('token');
+  const statusMsg = document.getElementById('statusMsg');
+  const loginLink = document.getElementById('loginLink');
+  if (!token) {
+    statusMsg.textContent = 'Missing verification token. Check the link in your email.';
+    statusMsg.className = 'msg err';
+    return;
+  }
+  try {
+    const res = await fetch('/api/auth/verify?token=' + encodeURIComponent(token));
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.error || 'Verification failed.');
+    statusMsg.textContent = body.message;
+    statusMsg.className = 'msg ok';
+  } catch (e) {
+    statusMsg.textContent = e.message;
+    statusMsg.className = 'msg err';
+  } finally {
+    loginLink.style.display = 'block';
+  }
+})();
+</script>
+</body>
+</html>

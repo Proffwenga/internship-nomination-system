@@ -3,8 +3,8 @@ const router = express.Router();
 const pool = require('../db');
 const { requireRole } = require('../auth');
 
-// Full master list of nominated students. HR only.
-router.get('/students', requireRole('hr'), async (req, res) => {
+// Full master list of nominated students. HR/admin only.
+router.get('/students', requireRole('hr', 'admin'), async (req, res) => {
   const { rows } = await pool.query(`
     SELECT s.id, s.full_name, s.gender, s.national_id, s.phone, s.email, s.year_of_study,
            s.department, s.area_of_interest, s.vernacular, s.interview_outcome,
@@ -17,17 +17,17 @@ router.get('/students', requireRole('hr'), async (req, res) => {
   res.json(rows);
 });
 
-// Update a student's interview outcome. HR only.
-router.patch('/students/:id', requireRole('hr'), async (req, res) => {
+// Update a student's interview outcome. HR/admin only.
+router.patch('/students/:id', requireRole('hr', 'admin'), async (req, res) => {
   const { interviewOutcome } = req.body || {};
   await pool.query('UPDATE students SET interview_outcome=$1 WHERE id=$2',
     [interviewOutcome || 'Pending', req.params.id]);
   res.json({ ok: true });
 });
 
-// Download a student's CV. HR only. Accepts either an Authorization header
-// or a "?token=" query string so it can be used as a plain link.
-router.get('/students/:id/cv', requireRole('hr'), async (req, res) => {
+// Download a student's CV. HR/admin only. Accepts either an Authorization
+// header or a "?token=" query string so it can be used as a plain link.
+router.get('/students/:id/cv', requireRole('hr', 'admin'), async (req, res) => {
   const { rows } = await pool.query(
     'SELECT cv_filename, cv_mimetype, cv_data FROM students WHERE id=$1', [req.params.id]
   );

@@ -4,7 +4,7 @@ const pool = require('../db');
 const { requireRole } = require('../auth');
 const DEPARTMENTS = require('../departments');
 
-router.get('/dashboard', requireRole('hr'), async (req, res) => {
+router.get('/dashboard', requireRole('hr', 'admin'), async (req, res) => {
   const institutionsCount = await pool.query('SELECT COUNT(*)::int AS n FROM institutions');
   const studentsCount = await pool.query('SELECT COUNT(*)::int AS n FROM students');
   const vernacularCount = await pool.query('SELECT COUNT(*)::int AS n FROM students WHERE vernacular');

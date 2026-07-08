@@ -9,14 +9,22 @@
 <body>
 
 <div id="loginView" class="login-box">
-  <h2>HR Login</h2>
-  <p style="font-size:13px;color:var(--muted)">Enter the HR access code to view nominations.</p>
-  <div class="field">
-    <label>Access code</label>
-    <input type="password" id="loginCode" placeholder="Access code">
-  </div>
-  <button id="loginBtn" style="width:100%">Continue</button>
+  <h2>HR / Admin Login</h2>
+  <p style="font-size:13px;color:var(--muted)">Log in with your Royal Media Services HR email to view nominations.</p>
+  <div class="field"><label>Email</label><input type="email" id="loginEmail" autocomplete="username"></div>
+  <div class="field"><label>Password</label><input type="password" id="loginPassword" autocomplete="current-password"></div>
+  <button id="loginBtn" style="width:100%">Log in</button>
   <div id="loginMsg" class="msg err" style="display:none"></div>
+  <div class="link-row"><a id="goForgot">Forgot password?</a></div>
+</div>
+
+<div id="forgotView" class="login-box" style="display:none">
+  <h2>Reset your password</h2>
+  <p style="font-size:13px;color:var(--muted)">Enter your email and we'll send you a link to reset your password.</p>
+  <div class="field"><label>Email</label><input type="email" id="forgotEmail"></div>
+  <button id="forgotBtn" style="width:100%">Send reset link</button>
+  <div id="forgotMsg" class="msg" style="display:none"></div>
+  <div class="link-row"><a id="backToLoginFromForgot">Back to login</a></div>
 </div>
 
 <div id="appView" style="display:none">
@@ -26,70 +34,113 @@
   </header>
   <div class="wrap">
 
-    <div class="datebar" id="dateBar"></div>
-
-    <div class="card">
-      <h2>Overview</h2>
-      <div class="kpi-grid" id="kpiGrid"></div>
+    <div class="account-box">
+      <div class="who">
+        <div><b id="acctName"></b> <span id="acctRoleTag" class="tag"></span></div>
+        <div id="acctEmail" style="color:var(--muted)"></div>
+      </div>
+      <button class="ghost small-btn" id="logoutBtn">Log out</button>
     </div>
 
-    <div class="card">
-      <h2>Gender Split</h2>
-      <div id="genderBars"></div>
+    <div class="tabs" id="tabs">
+      <button class="active" data-tab="dashboardTab">Dashboard</button>
+      <button data-tab="adminTab" id="adminTabBtn" style="display:none">Admin — Manage Accounts</button>
     </div>
 
-    <div class="card">
-      <h2>Nominations by Department</h2>
-      <div id="deptBars"></div>
+    <div id="dashboardTab">
+      <div class="datebar" id="dateBar"></div>
+
+      <div class="card">
+        <h2>Overview</h2>
+        <div class="kpi-grid" id="kpiGrid"></div>
+      </div>
+
+      <div class="card">
+        <h2>Gender Split</h2>
+        <div id="genderBars"></div>
+      </div>
+
+      <div class="card">
+        <h2>Nominations by Department</h2>
+        <div id="deptBars"></div>
+      </div>
+
+      <div class="card">
+        <h2>Institutions</h2>
+        <div class="toolbar">
+          <span></span>
+          <button class="ghost" id="exportInstBtn">Export institution summary (CSV)</button>
+        </div>
+        <div class="tablewrap">
+          <table id="instTable">
+            <thead><tr>
+              <th>Institution</th><th>Officer</th><th>Contact</th><th>Students</th>
+              <th>Vernacular</th><th>Max 10</th><th>Min 4 Vern.</th><th>CVs</th><th>Interview Status</th><th></th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="empty" id="instEmpty">No institutions submitted yet.</div>
+      </div>
+
+      <div class="card">
+        <h2>Master Nominations</h2>
+        <div class="toolbar">
+          <input type="text" id="searchBox" placeholder="Filter by name, institution, department...">
+          <button class="ghost" id="exportMasterBtn">Export consolidated list (CSV)</button>
+        </div>
+        <div class="tablewrap">
+          <table id="masterTable">
+            <thead><tr>
+              <th>#</th><th>Institution</th><th>Full Name</th><th>Gender</th><th>Department</th>
+              <th>Area of Interest</th><th>Vernacular</th><th>CV</th><th>Interview Outcome</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="empty" id="masterEmpty">No students nominated yet.</div>
+      </div>
     </div>
 
-    <div class="card">
-      <h2>Institutions</h2>
-      <div class="toolbar">
-        <span></span>
-        <button class="ghost" id="exportInstBtn">Export institution summary (CSV)</button>
+    <div id="adminTab" style="display:none">
+      <div class="card">
+        <h2>Add HR or Admin Account</h2>
+        <p style="font-size:12.5px;color:var(--muted)">Placement officers register themselves from the nomination page. Use this form only for HR and Admin colleagues. They'll receive an email with a link to set their own password.</p>
+        <div class="inline-form">
+          <div class="field"><label>Full Name</label><input type="text" id="newFullName"></div>
+          <div class="field"><label>Email</label><input type="email" id="newEmail"></div>
+          <div class="field" style="max-width:140px"><label>Role</label>
+            <select id="newRole"><option value="hr">HR</option><option value="admin">Admin</option></select>
+          </div>
+          <button id="addUserBtn">Create account</button>
+        </div>
+        <div id="addUserMsg" class="msg" style="display:none"></div>
       </div>
-      <div class="tablewrap">
-        <table id="instTable">
-          <thead><tr>
-            <th>Institution</th><th>Officer</th><th>Contact</th><th>Students</th>
-            <th>Vernacular</th><th>Max 10</th><th>Min 4 Vern.</th><th>CVs</th><th>Interview Status</th><th></th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="empty" id="instEmpty">No institutions submitted yet.</div>
-    </div>
 
-    <div class="card">
-      <h2>Master Nominations</h2>
-      <div class="toolbar">
-        <input type="text" id="searchBox" placeholder="Filter by name, institution, department...">
-        <button class="ghost" id="exportMasterBtn">Export consolidated list (CSV)</button>
+      <div class="card">
+        <h2>All Accounts</h2>
+        <div class="tablewrap">
+          <table id="usersTable">
+            <thead><tr>
+              <th>Name</th><th>Email</th><th>Role</th><th>Institution</th><th>Status</th><th>Verified</th><th>Last login</th><th></th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
-      <div class="tablewrap">
-        <table id="masterTable">
-          <thead><tr>
-            <th>#</th><th>Institution</th><th>Full Name</th><th>Gender</th><th>Department</th>
-            <th>Area of Interest</th><th>Vernacular</th><th>CV</th><th>Interview Outcome</th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="empty" id="masterEmpty">No students nominated yet.</div>
     </div>
 
   </div>
 </div>
 
 <script>
-let TOKEN = sessionStorage.getItem('hrToken') || '';
+let AUTH = JSON.parse(sessionStorage.getItem('hrAuth') || 'null');
 const DEPT_ORDER = ["Radio (Digital & Programming)","TV Production","Digital","Editorial",
   "Technical Site","Studio Technical Operations (STO)","ICT Services","Marketing","HR & Administration"];
 
 async function api(path, opts = {}) {
   opts.headers = opts.headers || {};
-  if (TOKEN) opts.headers['Authorization'] = 'Bearer ' + TOKEN;
+  if (AUTH && AUTH.token) opts.headers['Authorization'] = 'Bearer ' + AUTH.token;
   const res = await fetch('/api' + path, opts);
   const isJson = (res.headers.get('content-type') || '').includes('application/json');
   const body = isJson ? await res.json() : await res.text();
@@ -126,6 +177,7 @@ async function loadAll() {
   renderInstitutions(insts);
   window._students = students;
   renderMaster(students);
+  if (AUTH.role === 'admin') await loadUsers();
 }
 
 function renderKpis(d) {
@@ -213,7 +265,7 @@ function renderMaster(students, filter) {
   document.getElementById('masterTable').style.display = filtered.length ? 'table' : 'none';
   filtered.forEach((s, i) => {
     const tr = document.createElement('tr');
-    const cv = s.has_cv ? `<a href="/api/students/${s.id}/cv?token=${encodeURIComponent(TOKEN)}" target="_blank">Download</a>` : '<span style="color:var(--muted)">None</span>';
+    const cv = s.has_cv ? `<a href="/api/students/${s.id}/cv?token=${encodeURIComponent(AUTH.token)}" target="_blank">Download</a>` : '<span style="color:var(--muted)">None</span>';
     tr.innerHTML = `<td>${i+1}</td><td>${s.institution_name}</td><td>${s.full_name}</td><td>${s.gender||''}</td>
       <td>${s.department||''}</td><td>${s.area_of_interest||''}</td>
       <td><span class="badge ${String(s.vernacular)==='true'?'yes':'no'}">${s.vernacular?'Yes':'No'}</span></td>
@@ -233,45 +285,177 @@ function renderMaster(students, filter) {
   });
 }
 
+// ---- Admin: account management ----
+
+async function loadUsers() {
+  const users = await api('/admin/users');
+  const body = document.querySelector('#usersTable tbody');
+  body.innerHTML = '';
+  users.forEach(u => {
+    const tr = document.createElement('tr');
+    const statusTag = u.is_active ? '<span class="tag hr">Active</span>' : '<span class="tag inactive">Inactive</span>';
+    const verifiedTag = u.email_verified ? '<span class="badge yes">Yes</span>' : '<span class="badge no">No</span>';
+    tr.innerHTML = `
+      <td>${u.full_name}</td>
+      <td>${u.email}</td>
+      <td><span class="tag ${u.role}">${u.role}</span></td>
+      <td>${u.institution_name || ''}</td>
+      <td>${statusTag}</td>
+      <td>${verifiedTag}</td>
+      <td>${u.last_login_at ? fmtDate(u.last_login_at) : 'Never'}</td>
+      <td></td>
+    `;
+    const actions = document.createElement('div');
+    actions.style.display = 'flex';
+    actions.style.gap = '6px';
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = u.is_active ? 'danger small-btn' : 'ghost small-btn';
+    toggleBtn.textContent = u.is_active ? 'Deactivate' : 'Activate';
+    toggleBtn.addEventListener('click', async () => {
+      await api(`/admin/users/${u.id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !u.is_active }),
+      });
+      loadUsers();
+    });
+    actions.appendChild(toggleBtn);
+
+    if (!u.email_verified) {
+      const resendBtn = document.createElement('button');
+      resendBtn.className = 'ghost small-btn';
+      resendBtn.textContent = 'Resend email';
+      resendBtn.addEventListener('click', async () => {
+        const r = await api(`/admin/users/${u.id}/resend`, { method: 'POST' });
+        alert(r.message);
+      });
+      actions.appendChild(resendBtn);
+    }
+
+    tr.children[7].appendChild(actions);
+    body.appendChild(tr);
+  });
+}
+
+document.getElementById('addUserBtn').addEventListener('click', async () => {
+  const msg = document.getElementById('addUserMsg');
+  msg.style.display = 'none';
+  const payload = {
+    fullName: document.getElementById('newFullName').value.trim(),
+    email: document.getElementById('newEmail').value.trim(),
+    role: document.getElementById('newRole').value,
+  };
+  try {
+    const r = await api('/admin/users', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    msg.textContent = r.message;
+    msg.className = 'msg ok';
+    msg.style.display = 'block';
+    document.getElementById('newFullName').value = '';
+    document.getElementById('newEmail').value = '';
+    loadUsers();
+  } catch (e) {
+    msg.textContent = e.message;
+    msg.className = 'msg err';
+    msg.style.display = 'block';
+  }
+});
+
+// ---- Tabs ----
+document.querySelectorAll('#tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('dashboardTab').style.display = btn.dataset.tab === 'dashboardTab' ? 'block' : 'none';
+    document.getElementById('adminTab').style.display = btn.dataset.tab === 'adminTab' ? 'block' : 'none';
+  });
+});
+
 document.getElementById('searchBox').addEventListener('input', () => renderMaster(window._students || []));
 document.getElementById('exportMasterBtn').addEventListener('click', () => {
-  window.open(`/api/export/students.csv?token=${encodeURIComponent(TOKEN)}`, '_blank');
+  window.open(`/api/export/students.csv?token=${encodeURIComponent(AUTH.token)}`, '_blank');
 });
 document.getElementById('exportInstBtn').addEventListener('click', () => {
-  window.open(`/api/export/institutions.csv?token=${encodeURIComponent(TOKEN)}`, '_blank');
+  window.open(`/api/export/institutions.csv?token=${encodeURIComponent(AUTH.token)}`, '_blank');
 });
 
+// ---- Auth ----
+
+function showView(name) {
+  ['loginView', 'forgotView', 'appView'].forEach(v => {
+    document.getElementById(v).style.display = v === name ? 'block' : 'none';
+  });
+}
+
+document.getElementById('goForgot').addEventListener('click', () => showView('forgotView'));
+document.getElementById('backToLoginFromForgot').addEventListener('click', () => showView('loginView'));
+
 document.getElementById('loginBtn').addEventListener('click', doLogin);
-document.getElementById('loginCode').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+[document.getElementById('loginEmail'), document.getElementById('loginPassword')].forEach(el =>
+  el.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
 
 async function doLogin() {
-  const code = document.getElementById('loginCode').value;
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const msg = document.getElementById('loginMsg');
+  msg.style.display = 'none';
   try {
-    const result = await fetch('/api/auth', {
+    const result = await api('/auth/login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role: 'hr', code }),
-    }).then(r => r.json());
-    if (!result.token) throw new Error(result.error || 'Login failed');
-    TOKEN = result.token;
-    sessionStorage.setItem('hrToken', TOKEN);
-    await showApp();
+      body: JSON.stringify({ email, password }),
+    });
+    if (result.role === 'facilitator') throw new Error('This login is for HR and Admin staff only. Placement officers should use the nomination page.');
+    AUTH = result;
+    sessionStorage.setItem('hrAuth', JSON.stringify(AUTH));
+    await enterApp();
   } catch (e) {
-    const m = document.getElementById('loginMsg');
-    m.textContent = e.message;
-    m.style.display = 'block';
+    msg.textContent = e.message;
+    msg.style.display = 'block';
   }
 }
 
-async function showApp() {
-  document.getElementById('loginView').style.display = 'none';
-  document.getElementById('appView').style.display = 'block';
+document.getElementById('forgotBtn').addEventListener('click', async () => {
+  const msg = document.getElementById('forgotMsg');
+  msg.style.display = 'none';
+  try {
+    const r = await api('/auth/forgot-password', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: document.getElementById('forgotEmail').value.trim() }),
+    });
+    msg.textContent = r.message;
+    msg.className = 'msg ok';
+    msg.style.display = 'block';
+  } catch (e) {
+    msg.textContent = e.message;
+    msg.className = 'msg err';
+    msg.style.display = 'block';
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem('hrAuth');
+  AUTH = null;
+  location.reload();
+});
+
+async function enterApp() {
+  showView('appView');
+  document.getElementById('acctName').textContent = AUTH.fullName;
+  document.getElementById('acctEmail').textContent = AUTH.email;
+  const roleTag = document.getElementById('acctRoleTag');
+  roleTag.textContent = AUTH.role;
+  roleTag.className = 'tag ' + AUTH.role;
+  document.getElementById('adminTabBtn').style.display = AUTH.role === 'admin' ? 'inline-block' : 'none';
   await loadAll();
 }
 
 (async function init() {
-  if (TOKEN) {
-    try { await loadAll(); await showApp(); return; } catch (e) { sessionStorage.removeItem('hrToken'); TOKEN = ''; }
+  if (AUTH && AUTH.token) {
+    try { await enterApp(); return; } catch (e) { sessionStorage.removeItem('hrAuth'); AUTH = null; }
   }
+  showView('loginView');
 })();
 </script>
 </body>

@@ -1,5 +1,7 @@
 -- Internship Nomination System — PostgreSQL schema
--- Run this once against your cloud database before starting the server.
+-- Safe to re-run: every statement uses IF NOT EXISTS, so running this again
+-- against an already-set-up database only adds what's missing (e.g. the
+-- users table added when account-based login was introduced).
 
 CREATE TABLE IF NOT EXISTS institutions (
   id                        SERIAL PRIMARY KEY,
@@ -38,3 +40,26 @@ CREATE TABLE IF NOT EXISTS students (
 
 CREATE INDEX IF NOT EXISTS idx_students_institution ON students(institution_id);
 CREATE INDEX IF NOT EXISTS idx_institutions_name_lower ON institutions (lower(name));
+
+-- Individual login accounts. 'facilitator' = placement officer at a partner
+-- institution (self-registers); 'hr' and 'admin' are created by an existing
+-- admin. 'admin' can additionally manage other accounts.
+CREATE TABLE IF NOT EXISTS users (
+  id                           SERIAL PRIMARY KEY,
+  email                        TEXT NOT NULL UNIQUE,
+  password_hash                TEXT NOT NULL,
+  role                         TEXT NOT NULL CHECK (role IN ('admin','hr','facilitator')),
+  full_name                    TEXT NOT NULL,
+  institution_name             TEXT,
+  phone                        TEXT,
+  is_active                    BOOLEAN NOT NULL DEFAULT true,
+  email_verified               BOOLEAN NOT NULL DEFAULT false,
+  verification_token           TEXT,
+  verification_token_expires   TIMESTAMPTZ,
+  reset_token                  TEXT,
+  reset_token_expires          TIMESTAMPTZ,
+  created_at                   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  last_login_at                TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_email_lower ON users (lower(email));

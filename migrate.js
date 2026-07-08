@@ -1,5 +1,3 @@
-// One-off script: creates the tables on your cloud database.
-// Run with: node migrate.js
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');

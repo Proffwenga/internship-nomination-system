@@ -7,6 +7,7 @@ app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api', require('./routes/auth'));
+app.use('/api', require('./routes/admin'));
 app.use('/api', require('./routes/meta'));
 app.use('/api', require('./routes/nominations'));
 app.use('/api', require('./routes/students'));

@@ -10,7 +10,7 @@ function toCsv(rows) {
   }).join(',')).join('\r\n');
 }
 
-router.get('/export/students.csv', requireRole('hr'), async (req, res) => {
+router.get('/export/students.csv', requireRole('hr', 'admin'), async (req, res) => {
   const { rows } = await pool.query(`
     SELECT i.name AS institution, s.full_name, s.gender, s.national_id, s.phone, s.email,
            s.year_of_study, s.department, s.area_of_interest, s.vernacular,
@@ -28,7 +28,7 @@ router.get('/export/students.csv', requireRole('hr'), async (req, res) => {
   res.send(toCsv([header, ...body]));
 });
 
-router.get('/export/institutions.csv', requireRole('hr'), async (req, res) => {
+router.get('/export/institutions.csv', requireRole('hr', 'admin'), async (req, res) => {
   const { rows } = await pool.query(`
     SELECT i.name, i.officer_name, i.officer_email, i.officer_phone, i.interview_status,
            i.submitted_at,

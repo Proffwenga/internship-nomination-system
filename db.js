@@ -1,7 +1,3 @@
-// Database connection. In normal (production) use this talks to the real
-// cloud PostgreSQL database via DATABASE_URL. When USE_PGMEM=true it swaps
-// in an in-memory Postgres-compatible engine instead, purely so the app can
-// be exercised end-to-end without a live server — used for testing only.
 const fs = require('fs');
 const path = require('path');
 

@@ -22,21 +22,21 @@ const upload = multer({
   },
 });
 
-// Submit or update a nomination. Officer role only.
-router.post('/nominations', requireRole('officer'), upload.any(), async (req, res) => {
+// Submit or update a nomination. Facilitator role only. Officer identity and
+// institution name come from the logged-in account, not the form body, so a
+// facilitator can only ever submit under their own institution.
+router.post('/nominations', requireRole('facilitator'), upload.any(), async (req, res) => {
   const client = await pool.connect();
   try {
-    const {
-      officerName, institutionName, officerEmail, officerPhone,
-      declarationFinalYear, declarationAvailability, declarationUnpaid,
-      studentsJson,
-    } = req.body;
+    const { studentsJson,
+      declarationFinalYear, declarationAvailability, declarationUnpaid } = req.body;
+    const officerName = req.user.fullName;
+    const institutionName = req.user.institutionName;
+    const officerEmail = req.user.email;
+    const officerPhone = req.user.phone || '';
 
-    if (!institutionName || !institutionName.trim()) {
-      return res.status(400).json({ error: 'Name of institution is required.' });
-    }
-    if (!officerName || !officerName.trim()) {
-      return res.status(400).json({ error: 'Placement officer name is required.' });
+    if (!institutionName) {
+      return res.status(400).json({ error: 'Your account has no institution on file. Contact HR.' });
     }
     let students;
     try {
@@ -57,7 +57,7 @@ router.post('/nominations', requireRole('officer'), upload.any(), async (req, re
     await client.query('BEGIN');
 
     const existing = await client.query(
-      'SELECT id FROM institutions WHERE lower(name) = lower($1)', [institutionName.trim()]
+      'SELECT id FROM institutions WHERE lower(name) = lower($1)', [institutionName]
     );
 
     let institutionId;
@@ -67,7 +67,7 @@ router.post('/nominations', requireRole('officer'), upload.any(), async (req, re
         `UPDATE institutions SET officer_name=$1, officer_email=$2, officer_phone=$3,
          declaration_final_year=$4, declaration_availability=$5, declaration_unpaid=$6,
          updated_at=now() WHERE id=$7`,
-        [officerName.trim(), officerEmail || '', officerPhone || '',
+        [officerName, officerEmail, officerPhone,
          isYes(declarationFinalYear), isYes(declarationAvailability), isYes(declarationUnpaid),
          institutionId]
       );
@@ -78,7 +78,7 @@ router.post('/nominations', requireRole('officer'), upload.any(), async (req, re
          (name, officer_name, officer_email, officer_phone,
           declaration_final_year, declaration_availability, declaration_unpaid)
          VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
-        [institutionName.trim(), officerName.trim(), officerEmail || '', officerPhone || '',
+        [institutionName, officerName, officerEmail, officerPhone,
          isYes(declarationFinalYear), isYes(declarationAvailability), isYes(declarationUnpaid)]
       );
       institutionId = ins.rows[0].id;
@@ -125,8 +125,8 @@ router.post('/nominations', requireRole('officer'), upload.any(), async (req, re
   }
 });
 
-// List institutions with summary counts. HR only.
-router.get('/institutions', requireRole('hr'), async (req, res) => {
+// List institutions with summary counts. HR/admin only.
+router.get('/institutions', requireRole('hr', 'admin'), async (req, res) => {
   const { rows } = await pool.query(`
     SELECT i.id, i.name, i.officer_name, i.officer_email, i.officer_phone,
            i.interview_status, i.notes, i.submitted_at,
@@ -146,8 +146,8 @@ router.get('/institutions', requireRole('hr'), async (req, res) => {
   res.json(rows);
 });
 
-// Update interview status / notes for an institution. HR only.
-router.patch('/institutions/:id', requireRole('hr'), async (req, res) => {
+// Update interview status / notes for an institution. HR/admin only.
+router.patch('/institutions/:id', requireRole('hr', 'admin'), async (req, res) => {
   const { interviewStatus, notes } = req.body || {};
   await pool.query(
     `UPDATE institutions SET
@@ -160,8 +160,8 @@ router.patch('/institutions/:id', requireRole('hr'), async (req, res) => {
   res.json({ ok: true });
 });
 
-// Remove an institution and its students entirely. HR only.
-router.delete('/institutions/:id', requireRole('hr'), async (req, res) => {
+// Remove an institution and its students entirely. HR/admin only.
+router.delete('/institutions/:id', requireRole('hr', 'admin'), async (req, res) => {
   await pool.query('DELETE FROM institutions WHERE id=$1', [req.params.id]);
   res.json({ ok: true });
 });

@@ -5,18 +5,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Internship Nomination — Royal Media Services</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
 <div id="loginView" class="login-box">
   <h2>Placement Officer Login</h2>
-  <p style="font-size:13px;color:var(--muted)">Enter the access code given to you by Royal Media Services HR to submit your institution's nominations.</p>
-  <div class="field">
-    <label>Access code</label>
-    <input type="password" id="loginCode" placeholder="Access code">
-  </div>
-  <button id="loginBtn" style="width:100%">Continue</button>
+  <p style="font-size:13px;color:var(--muted)">Log in with your registered email to submit your institution's nominations.</p>
+  <div class="field"><label>Email</label><input type="email" id="loginEmail" autocomplete="username"></div>
+  <div class="field"><label>Password</label><input type="password" id="loginPassword" autocomplete="current-password"></div>
+  <button id="loginBtn" style="width:100%">Log in</button>
   <div id="loginMsg" class="msg err" style="display:none"></div>
+  <div id="resendRow" style="display:none;text-align:center;margin-top:8px">
+    <a id="resendLink" style="font-size:12.5px">Resend verification email</a>
+  </div>
+  <div class="link-row">
+    <a id="goRegister">Register as a new placement officer</a> &middot; <a id="goForgot">Forgot password?</a>
+  </div>
+</div>
+
+<div id="registerView" class="login-box" style="display:none;max-width:440px">
+  <h2>Register — Placement Officer</h2>
+  <p style="font-size:13px;color:var(--muted)">Create an account to submit nominations on behalf of your institution.</p>
+  <div class="field"><label>Full Name *</label><input type="text" id="regFullName"></div>
+  <div class="field"><label>Name of Institution *</label><input type="text" id="regInstitution"></div>
+  <div class="field"><label>Email *</label><input type="email" id="regEmail" autocomplete="username"></div>
+  <div class="field"><label>Phone</label><input type="tel" id="regPhone"></div>
+  <div class="field"><label>Password (min 8 characters) *</label><input type="password" id="regPassword" autocomplete="new-password"></div>
+  <button id="registerBtn" style="width:100%">Create account</button>
+  <div id="registerMsg" class="msg" style="display:none"></div>
+  <div class="link-row"><a id="backToLoginFromRegister">Back to login</a></div>
+</div>
+
+<div id="forgotView" class="login-box" style="display:none">
+  <h2>Reset your password</h2>
+  <p style="font-size:13px;color:var(--muted)">Enter your email and we'll send you a link to reset your password.</p>
+  <div class="field"><label>Email</label><input type="email" id="forgotEmail"></div>
+  <button id="forgotBtn" style="width:100%">Send reset link</button>
+  <div id="forgotMsg" class="msg" style="display:none"></div>
+  <div class="link-row"><a id="backToLoginFromForgot">Back to login</a></div>
 </div>
 
 <div id="appView" style="display:none">
@@ -27,6 +54,15 @@
   <div class="wrap narrow">
 
     <div class="datebar" id="dateBar"></div>
+
+    <div class="account-box">
+      <div class="who">
+        <div><b id="acctName"></b></div>
+        <div id="acctInstitution" style="color:var(--muted)"></div>
+        <div id="acctEmail" style="color:var(--muted)"></div>
+      </div>
+      <button class="ghost small-btn" id="logoutBtn">Log out</button>
+    </div>
 
     <div class="card">
       <h2>Background</h2>
@@ -57,18 +93,19 @@
     </div>
 
     <div class="card">
-      <h2>Section B — Placement Officer &amp; Institution Details</h2>
-      <div class="grid2">
-        <div class="field"><label>Placement Officer Name *</label><input type="text" id="officerName"></div>
-        <div class="field"><label>Name of Institution *</label><input type="text" id="institutionName"></div>
-        <div class="field"><label>Placement Officer Email / Alternative Email</label><input type="email" id="officerEmail"></div>
-        <div class="field"><label>Placement Officer Phone / Alternative Number</label><input type="tel" id="officerPhone"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Section C — Student Nominations</h2>
+      <h2>Section B — Student Nominations</h2>
       <p style="font-size:12.5px;color:var(--muted)">Maximum 10 students; minimum 4 for vernacular media placements. Attach a CV (PDF or Word, max <span id="maxCvSize">5</span>MB) for each student if available.</p>
+
+      <div class="toolbar" style="margin-bottom:14px">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="ghost" id="uploadExcelBtn" type="button">Upload from Excel</button>
+          <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none">
+          <span style="font-size:11.5px;color:var(--muted)">Fills in the students below from an Excel file — review before submitting.</span>
+        </div>
+        <a href="Nomination-Form-Template.xlsx" download style="font-size:12.5px">Download Excel template</a>
+      </div>
+      <div id="importMsg" class="msg" style="display:none;white-space:pre-line"></div>
+
       <div id="studentsContainer"></div>
       <button class="ghost" id="addStudentBtn" type="button">+ Add another student</button>
 
@@ -80,17 +117,9 @@
     </div>
 
     <div class="card">
-      <h2>Section D — Final Declaration</h2>
+      <h2>Section C — Final Declaration</h2>
       <div class="decl-row">
-        <span>1. The nominated students are final-year students requiring industrial attachment</span>
-        <select id="declFinalYear2"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
-      </div>
-      <div class="decl-row">
-        <span>2. The students will be available for the full internship period (September–December 2026)</span>
-        <select id="declAvailability2"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
-      </div>
-      <div class="decl-row">
-        <span>3. The institution has not nominated more than ten (10) students — verified automatically</span>
+        <span>1. The institution has not nominated more than ten (10) students — verified automatically</span>
         <span id="autoCompliance" class="badge no">No</span>
       </div>
     </div>
@@ -104,18 +133,18 @@
 </div>
 
 <script>
-let TOKEN = sessionStorage.getItem('officerToken') || '';
+let AUTH = JSON.parse(sessionStorage.getItem('facilitatorAuth') || 'null');
 let META = null;
 let studentCount = 0;
 const MAX_STUDENTS = 10;
 
 async function api(path, opts = {}) {
   opts.headers = opts.headers || {};
-  if (TOKEN) opts.headers['Authorization'] = 'Bearer ' + TOKEN;
+  if (AUTH && AUTH.token) opts.headers['Authorization'] = 'Bearer ' + AUTH.token;
   const res = await fetch('/api' + path, opts);
   const isJson = (res.headers.get('content-type') || '').includes('application/json');
   const body = isJson ? await res.json() : await res.text();
-  if (!res.ok) throw new Error((body && body.error) || 'Request failed');
+  if (!res.ok) { const err = new Error((body && body.error) || 'Request failed'); err.body = body; throw err; }
   return body;
 }
 
@@ -236,26 +265,204 @@ document.getElementById('addStudentBtn').addEventListener('click', addStudent);
 document.getElementById('studentsContainer').addEventListener('input', updateSummary);
 document.getElementById('studentsContainer').addEventListener('change', updateSummary);
 
+// ---- Upload from Excel ----
+
+const EXCEL_HEADER_MAP = {
+  'full name': 'name',
+  'gender': 'gender',
+  'national id number': 'nationalId',
+  'phone number': 'phone',
+  'email address': 'email',
+  'year of study': 'year',
+  'department': 'department',
+  'area of interest': 'area',
+};
+
+function excelNormGender(raw) {
+  const v = String(raw || '').trim().toLowerCase();
+  if (!v) return { value: '', ok: true };
+  if (v === 'm' || v === 'male') return { value: 'Male', ok: true };
+  if (v === 'f' || v === 'female') return { value: 'Female', ok: true };
+  return { value: '', ok: false, raw };
+}
+
+function excelNormVernacular(raw) {
+  const v = String(raw || '').trim().toLowerCase();
+  if (v === 'y' || v === 'yes') return { value: 'Yes', ok: true };
+  if (v === 'n' || v === 'no' || v === '') return { value: 'No', ok: true };
+  return { value: 'No', ok: false, raw };
+}
+
+function excelMatchDepartment(raw) {
+  const v = String(raw || '').trim().toLowerCase();
+  if (!v) return { dept: null, ok: true };
+  const dept = META.departments.find(d => d.name.trim().toLowerCase() === v);
+  if (dept) return { dept, ok: true };
+  return { dept: null, ok: false, raw };
+}
+
+function excelMatchArea(dept, raw) {
+  const v = String(raw || '').trim();
+  if (!v) return { value: '', ok: true };
+  if (!dept) return { value: v, ok: false, raw: v };
+  const found = dept.areas.find(a => a.trim().toLowerCase() === v.toLowerCase());
+  if (found) return { value: found, ok: true };
+  return { value: v, ok: false, raw: v };
+}
+
+function parseNominationWorkbook(arrayBuffer) {
+  const wb = XLSX.read(arrayBuffer, { type: 'array' });
+  const sheetName = wb.SheetNames.includes('Nomination Form') ? 'Nomination Form' : wb.SheetNames[0];
+  const sheet = wb.Sheets[sheetName];
+  const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', blankrows: false });
+
+  let headerRowIdx = -1;
+  const colIndex = {};
+  for (let i = 0; i < rows.length; i++) {
+    const norm = rows[i].map(c => String(c || '').trim().toLowerCase());
+    if (norm.includes('full name')) {
+      headerRowIdx = i;
+      norm.forEach((h, idx) => {
+        const cleaned = h.replace(/\s+/g, ' ').trim();
+        for (const key in EXCEL_HEADER_MAP) {
+          if (cleaned.startsWith(key)) colIndex[EXCEL_HEADER_MAP[key]] = idx;
+        }
+        if (cleaned.startsWith('vernacular')) colIndex.vernacular = idx;
+      });
+      break;
+    }
+  }
+  if (headerRowIdx === -1 || colIndex.name === undefined) {
+    throw new Error('Could not find a "Full Name" column. Make sure you are uploading the Section C student table from the nomination template.');
+  }
+
+  const students = [];
+  const warnings = [];
+  for (let i = headerRowIdx + 1; i < rows.length && students.length < MAX_STUDENTS; i++) {
+    const row = rows[i];
+    const name = String(row[colIndex.name] || '').trim();
+    if (!name) continue;
+
+    const genderR = excelNormGender(row[colIndex.gender]);
+    const vernR = excelNormVernacular(row[colIndex.vernacular]);
+    const deptR = excelMatchDepartment(row[colIndex.department]);
+    const areaR = excelMatchArea(deptR.dept, row[colIndex.area]);
+
+    if (!genderR.ok) warnings.push(`"${name}": gender "${genderR.raw}" not recognised — select manually.`);
+    if (!vernR.ok) warnings.push(`"${name}": vernacular value "${vernR.raw}" not recognised — defaulted to No, check manually.`);
+    if (!deptR.ok) warnings.push(`"${name}": department "${deptR.raw}" not recognised — select manually.`);
+    if (!areaR.ok) warnings.push(`"${name}": area of interest "${areaR.raw}" not in the list for that department — check manually.`);
+
+    students.push({
+      name,
+      gender: genderR.value,
+      nationalId: String(row[colIndex.nationalId] || '').trim(),
+      phone: String(row[colIndex.phone] || '').trim(),
+      email: String(row[colIndex.email] || '').trim(),
+      year: String(row[colIndex.year] || '').trim(),
+      department: deptR.dept ? deptR.dept.name : String(row[colIndex.department] || '').trim(),
+      area: areaR.value,
+      vernacular: vernR.value,
+    });
+  }
+  if (!students.length) {
+    throw new Error('No student rows were found under the "Full Name" column. Add at least one student to the sheet before uploading.');
+  }
+  return { students, warnings };
+}
+
+function fillStudentCard(index, data) {
+  const card = document.querySelector(`.student-card[data-index="${index}"]`);
+  if (!card) return;
+  card.querySelector('.s-name').value = data.name || '';
+  card.querySelector('.s-nid').value = data.nationalId || '';
+  card.querySelector('.s-phone').value = data.phone || '';
+  card.querySelector('.s-email').value = data.email || '';
+  card.querySelector('.s-year').value = data.year || '';
+
+  const genderSel = card.querySelector('.s-gender');
+  if (data.gender) genderSel.value = data.gender;
+
+  const deptSel = card.querySelector('.s-dept');
+  const deptMatch = META.departments.find(d => d.name === data.department);
+  if (deptMatch) {
+    deptSel.value = deptMatch.name;
+  } else if (data.department) {
+    const opt = document.createElement('option');
+    opt.value = data.department;
+    opt.textContent = data.department + ' (not in list — check manually)';
+    deptSel.appendChild(opt);
+    deptSel.value = data.department;
+  }
+  onDeptChange(index);
+
+  const areaSel = card.querySelector('.s-area');
+  if (data.area) {
+    const hasOption = Array.from(areaSel.options).some(o => o.value === data.area);
+    if (!hasOption) {
+      const opt = document.createElement('option');
+      opt.value = data.area;
+      opt.textContent = data.area + ' (not in list — check manually)';
+      areaSel.appendChild(opt);
+    }
+    areaSel.value = data.area;
+  }
+
+  card.querySelector('.s-vern').value = data.vernacular || 'No';
+}
+
+function showImportMsg(text, ok) {
+  const msg = document.getElementById('importMsg');
+  msg.textContent = text;
+  msg.className = 'msg ' + (ok ? 'ok' : 'err');
+  msg.style.display = 'block';
+  msg.scrollIntoView({ behavior: 'smooth' });
+}
+
+document.getElementById('uploadExcelBtn').addEventListener('click', () => {
+  document.getElementById('excelFileInput').click();
+});
+
+document.getElementById('excelFileInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+
+  const existing = collectStudents();
+  const hasData = existing.some(s => s.name || s.email || s.phone);
+  if (hasData && !confirm('This will replace the students currently on the form with the ones from the Excel file. Continue?')) {
+    return;
+  }
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const { students, warnings } = parseNominationWorkbook(arrayBuffer);
+
+    document.getElementById('studentsContainer').innerHTML = '';
+    studentCount = 0;
+    students.forEach((s) => {
+      addStudent();
+      fillStudentCard(studentCount - 1, s);
+    });
+    updateSummary();
+
+    const summary = `Imported ${students.length} student(s) from the Excel file.`;
+    showImportMsg(warnings.length ? `${summary}\n\n${warnings.length} row(s) need a manual check:\n${warnings.join('\n')}` : summary, warnings.length === 0);
+  } catch (err) {
+    showImportMsg(err.message, false);
+  }
+});
+
 document.getElementById('submitBtn').addEventListener('click', async () => {
   const msg = document.getElementById('submitMsg');
   msg.style.display = 'none';
   const students = collectStudents();
-  if (!document.getElementById('institutionName').value.trim()) {
-    return showMsg('Name of institution is required.', false);
-  }
-  if (!document.getElementById('officerName').value.trim()) {
-    return showMsg('Placement officer name is required.', false);
-  }
   if (students.length === 0) return showMsg('Add at least one student.', false);
   if (students.length > 10) return showMsg('A maximum of 10 students may be nominated.', false);
 
   const fd = new FormData();
-  fd.append('officerName', document.getElementById('officerName').value.trim());
-  fd.append('institutionName', document.getElementById('institutionName').value.trim());
-  fd.append('officerEmail', document.getElementById('officerEmail').value.trim());
-  fd.append('officerPhone', document.getElementById('officerPhone').value.trim());
-  fd.append('declarationFinalYear', document.getElementById('declFinalYear2').value || document.getElementById('declFinalYear').value);
-  fd.append('declarationAvailability', document.getElementById('declAvailability2').value || document.getElementById('declAvailability').value);
+  fd.append('declarationFinalYear', document.getElementById('declFinalYear').value);
+  fd.append('declarationAvailability', document.getElementById('declAvailability').value);
   fd.append('declarationUnpaid', document.getElementById('declUnpaid').value);
 
   const studentsPayload = students.map(({ cvInput, ...rest }) => rest);
@@ -286,38 +493,121 @@ function showMsg(text, ok) {
   msg.scrollIntoView({ behavior: 'smooth' });
 }
 
+// ---- Auth: login / register / forgot password ----
+
+function showView(name) {
+  ['loginView', 'registerView', 'forgotView', 'appView'].forEach(v => {
+    document.getElementById(v).style.display = v === name ? (name === 'appView' ? 'block' : 'block') : 'none';
+  });
+}
+
+document.getElementById('goRegister').addEventListener('click', () => showView('registerView'));
+document.getElementById('goForgot').addEventListener('click', () => showView('forgotView'));
+document.getElementById('backToLoginFromRegister').addEventListener('click', () => showView('loginView'));
+document.getElementById('backToLoginFromForgot').addEventListener('click', () => showView('loginView'));
+
 document.getElementById('loginBtn').addEventListener('click', doLogin);
-document.getElementById('loginCode').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+[document.getElementById('loginEmail'), document.getElementById('loginPassword')].forEach(el =>
+  el.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
+
+let lastLoginEmail = '';
 
 async function doLogin() {
-  const code = document.getElementById('loginCode').value;
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  lastLoginEmail = email;
+  const msg = document.getElementById('loginMsg');
+  const resendRow = document.getElementById('resendRow');
+  msg.style.display = 'none';
+  resendRow.style.display = 'none';
   try {
-    const result = await fetch('/api/auth', {
+    const result = await api('/auth/login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role: 'officer', code }),
-    }).then(r => r.json());
-    if (!result.token) throw new Error(result.error || 'Login failed');
-    TOKEN = result.token;
-    sessionStorage.setItem('officerToken', TOKEN);
-    await showApp();
+      body: JSON.stringify({ email, password }),
+    });
+    AUTH = result;
+    sessionStorage.setItem('facilitatorAuth', JSON.stringify(AUTH));
+    await enterApp();
   } catch (e) {
-    const m = document.getElementById('loginMsg');
-    m.textContent = e.message;
-    m.style.display = 'block';
+    msg.textContent = e.message;
+    msg.style.display = 'block';
+    if (e.body && e.body.needsVerification) resendRow.style.display = 'block';
   }
 }
 
-async function showApp() {
-  document.getElementById('loginView').style.display = 'none';
-  document.getElementById('appView').style.display = 'block';
+document.getElementById('resendLink').addEventListener('click', async () => {
+  try {
+    const r = await api('/auth/resend-verification', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: lastLoginEmail }),
+    });
+    alert(r.message);
+  } catch (e) { alert(e.message); }
+});
+
+document.getElementById('registerBtn').addEventListener('click', async () => {
+  const msg = document.getElementById('registerMsg');
+  msg.style.display = 'none';
+  const payload = {
+    fullName: document.getElementById('regFullName').value.trim(),
+    institutionName: document.getElementById('regInstitution').value.trim(),
+    email: document.getElementById('regEmail').value.trim(),
+    phone: document.getElementById('regPhone').value.trim(),
+    password: document.getElementById('regPassword').value,
+  };
+  try {
+    const r = await api('/auth/register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    msg.textContent = r.message;
+    msg.className = 'msg ok';
+    msg.style.display = 'block';
+  } catch (e) {
+    msg.textContent = e.message;
+    msg.className = 'msg err';
+    msg.style.display = 'block';
+  }
+});
+
+document.getElementById('forgotBtn').addEventListener('click', async () => {
+  const msg = document.getElementById('forgotMsg');
+  msg.style.display = 'none';
+  try {
+    const r = await api('/auth/forgot-password', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: document.getElementById('forgotEmail').value.trim() }),
+    });
+    msg.textContent = r.message;
+    msg.className = 'msg ok';
+    msg.style.display = 'block';
+  } catch (e) {
+    msg.textContent = e.message;
+    msg.className = 'msg err';
+    msg.style.display = 'block';
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem('facilitatorAuth');
+  AUTH = null;
+  location.reload();
+});
+
+async function enterApp() {
+  showView('appView');
+  document.getElementById('acctName').textContent = AUTH.fullName;
+  document.getElementById('acctInstitution').textContent = AUTH.institutionName;
+  document.getElementById('acctEmail').textContent = AUTH.email;
   await loadMeta();
   addStudent();
 }
 
 (async function init() {
-  if (TOKEN) {
-    try { await loadMeta(); await showApp(); return; } catch (e) { sessionStorage.removeItem('officerToken'); TOKEN = ''; }
+  if (AUTH && AUTH.token) {
+    try { await enterApp(); return; } catch (e) { sessionStorage.removeItem('facilitatorAuth'); AUTH = null; }
   }
+  showView('loginView');
 })();
 </script>
 </body>
