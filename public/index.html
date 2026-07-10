@@ -1,703 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Internship Nomination — Royal Media Services</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<title>RMS Internships — Nomination</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#101a1c; --fg:#ffffff; --sub:#aeb8ba; --muted:#7d8c8f;
+    --orange:#f58320; --green:#a4ce39;
+    --hairline:rgba(255,255,255,.1); --hairline-soft:rgba(255,255,255,.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{background:var(--bg);color:var(--fg);font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased;}
+  a{text-decoration:none;color:inherit;}
+  a:hover{filter:brightness(.92);}
+
+  .page{position:relative;width:100%;min-height:100vh;background:var(--bg);overflow:hidden;display:flex;flex-direction:column;}
+  .glow{position:absolute;pointer-events:none;filter:blur(20px);width:560px;height:560px;}
+  .glow-1{top:-160px;right:-120px;background:radial-gradient(circle,rgba(245,131,32,.32),transparent 62%);}
+  .glow-2{bottom:-200px;left:-140px;background:radial-gradient(circle,rgba(164,206,57,.22),transparent 64%);}
+
+  /* nav */
+  .nav{position:relative;display:flex;align-items:center;justify-content:space-between;padding:24px 56px;border-bottom:1px solid var(--hairline-soft);}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{display:flex;align-items:center;justify-content:center;width:40px;height:40px;background:var(--orange);color:#fff;border-radius:11px;font-weight:700;font-size:16px;letter-spacing:-.03em;}
+  .brand-text{display:flex;flex-direction:column;line-height:1.1;}
+  .brand-kicker{font-size:10px;letter-spacing:.22em;color:var(--muted);font-weight:600;}
+  .brand-title{font-size:16px;font-weight:700;}
+  .nav-links{display:flex;align-items:center;gap:32px;font-size:14px;color:var(--sub);font-weight:500;}
+  .nav-logo img{height:42px;width:auto;display:block;}
+
+  /* hero */
+  .hero{position:relative;flex:1;padding:80px 56px 64px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+  .badge{display:inline-flex;align-items:center;gap:9px;padding:8px 16px;border:1px solid rgba(164,206,57,.4);border-radius:999px;font-size:13px;font-weight:600;color:var(--green);margin-bottom:26px;}
+  .badge-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(164,206,57,.18);}
+  .hero h1{margin:0;font-size:66px;line-height:1.02;font-weight:700;letter-spacing:-.03em;max-width:960px;}
+  .hero h1 .hl{color:var(--orange);}
+  .hero p{margin:26px 0 0;font-size:19px;line-height:1.6;color:var(--sub);max-width:720px;}
+  .cta{display:flex;gap:14px;margin-top:38px;flex-wrap:wrap;justify-content:center;}
+  .btn-primary{display:inline-flex;align-items:center;gap:9px;padding:16px 30px;background:var(--orange);color:#fff;font-weight:700;font-size:16px;border-radius:12px;box-shadow:0 16px 30px -12px rgba(245,131,32,.6);}
+  .btn-ghost{display:inline-flex;align-items:center;padding:16px 28px;border:1px solid rgba(255,255,255,.22);color:#fff;font-weight:600;font-size:16px;border-radius:12px;}
+
+  .facts{display:flex;align-items:stretch;margin-top:40px;border:1px solid var(--hairline);border-radius:14px;overflow:hidden;}
+  .fact{padding:16px 28px;text-align:left;}
+  .fact-label{font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:600;}
+  .fact-value{font-size:19px;font-weight:700;margin-top:5px;}
+  .fact-value.accent{color:var(--green);}
+  .fact-div{width:1px;background:var(--hairline);}
+
+  /* how it works */
+  .howto{position:relative;padding:64px 56px;border-top:1px solid var(--hairline-soft);}
+  .howto-kicker{margin:0;text-align:center;font-size:12px;letter-spacing:.2em;color:var(--muted);font-weight:600;}
+  .howto-title{margin:10px 0 40px;text-align:center;font-size:32px;font-weight:700;letter-spacing:-.02em;}
+  .howto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1080px;margin:0 auto;}
+  .howto-step{position:relative;padding:24px 22px 22px;border:1px solid var(--hairline);border-radius:14px;background:rgba(255,255,255,.02);}
+  .howto-num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:var(--orange);color:#fff;border-radius:9px;font-weight:700;font-size:14px;margin-bottom:14px;}
+  .howto-step h3{margin:0 0 8px;font-size:16px;font-weight:700;}
+  .howto-step p{margin:0;font-size:13.5px;line-height:1.55;color:var(--sub);}
+
+  @media (max-width:720px){
+    .howto{padding:48px 22px;} .howto-title{font-size:24px;} .howto-grid{grid-template-columns:1fr;}
+  }
+
+  /* marquee */
+  .marquee-wrap{position:relative;padding:26px 0 34px;border-top:1px solid var(--hairline-soft);background:rgba(255,255,255,.02);}
+  .marquee-label{margin:0 0 20px;text-align:center;font-size:12px;letter-spacing:.2em;color:var(--muted);font-weight:600;}
+  .marquee{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);}
+  .marquee-track{display:flex;align-items:center;gap:26px;width:max-content;animation:rmsMarquee 55s linear infinite;}
+  .marquee-track img{height:98px;width:auto;flex:none;}
+  @keyframes rmsMarquee{to{transform:translateX(-50%);}}
+
+  @media (max-width:720px){
+    .nav{padding:18px 22px;} .nav-links{display:none;}
+    .hero{padding:56px 22px 48px;} .hero h1{font-size:40px;} .hero p{font-size:16px;}
+    .facts{flex-direction:column;} .fact-div{width:auto;height:1px;}
+  }
+</style>
 </head>
 <body>
+<div class="page">
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
 
-<div id="loginView" class="login-box">
-  <h2>Placement Officer Login</h2>
-  <p style="font-size:13px;color:var(--muted)">Log in with your registered email to submit your institution's nominations.</p>
-  <div class="field"><label>Email</label><input type="email" id="loginEmail" autocomplete="username"></div>
-  <div class="field"><label>Password</label><input type="password" id="loginPassword" autocomplete="current-password"></div>
-  <button id="loginBtn" style="width:100%">Log in</button>
-  <div id="loginMsg" class="msg err" style="display:none"></div>
-  <div id="resendRow" style="display:none;text-align:center;margin-top:8px">
-    <a id="resendLink" style="font-size:12.5px">Resend verification email</a>
+  <nav class="nav">
+    <a class="nav-logo" href="login.html"><img src="assets/citizen-logo.png" alt="Citizen Television"></a>
+    <div class="nav-links">
+      <a href="#how-it-works">How it works</a><a href="#">FAQ</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <span class="badge"><span class="badge-dot"></span>September–December 2026 cohort · nominations open</span>
+    <h1>Launch your <span class="hl">media career</span> where Kenya tunes in.</h1>
+    <p>Royal Media Services runs a structured four-month internship across Kenya's biggest TV, radio and digital brands. Nominations are submitted by authorised Placement Officers on behalf of their institutions.</p>
+    <div class="cta">
+      <a class="btn-primary" href="login.html">Placement Officer Login →</a>
+      <a class="btn-ghost" href="login.html">Register your institution</a>
+    </div>
+    <div class="facts">
+      <div class="fact"><div class="fact-label">NOMINATIONS CLOSE</div><div class="fact-value">25 July 2026</div></div>
+      <div class="fact-div"></div>
+      <div class="fact"><div class="fact-label">COHORT</div><div class="fact-value">Sep – Dec 2026</div></div>
+      <div class="fact-div"></div>
+      <div class="fact"><div class="fact-label">INTERVIEWS</div><div class="fact-value accent">07 Aug 2026</div></div>
+    </div>
   </div>
-  <div class="link-row">
-    <a id="goRegister">Register as a new placement officer</a> &middot; <a id="goForgot">Forgot password?</a>
+
+  <div class="howto" id="how-it-works">
+    <p class="howto-kicker">HOW IT WORKS</p>
+    <h2 class="howto-title">Get your nominations in, in six steps</h2>
+    <div class="howto-grid">
+      <div class="howto-step">
+        <span class="howto-num">1</span>
+        <h3>Register your institution</h3>
+        <p>Create a placement-officer account using your institution email address.</p>
+      </div>
+      <div class="howto-step">
+        <span class="howto-num">2</span>
+        <h3>Verify your email</h3>
+        <p>Open the verification link we send you, then log in with your new password.</p>
+      </div>
+      <div class="howto-step">
+        <span class="howto-num">3</span>
+        <h3>Review the cohort details</h3>
+        <p>Check the Background section for eligibility rules, key dates and the nomination limit.</p>
+      </div>
+      <div class="howto-step">
+        <span class="howto-num">4</span>
+        <h3>Add your institution details</h3>
+        <p>Enter your Dean or HOD's name, job title, phone and email, then complete the declarations.</p>
+      </div>
+      <div class="howto-step">
+        <span class="howto-num">5</span>
+        <h3>Nominate your students</h3>
+        <p>Add up to 10 students one by one, or upload the Excel template. At least 4 must be vernacular media placements.</p>
+      </div>
+      <div class="howto-step">
+        <span class="howto-num">6</span>
+        <h3>Submit before the deadline</h3>
+        <p>Confirm your declarations and submit by 25 July 2026. Shortlisted candidates are contacted for interviews on 07 August 2026.</p>
+      </div>
+    </div>
   </div>
-</div>
 
-<div id="registerView" class="login-box" style="display:none;max-width:440px">
-  <h2>Register — Placement Officer</h2>
-  <p style="font-size:13px;color:var(--muted)">Create an account to submit nominations on behalf of your institution.</p>
-  <div class="field"><label>Full Name *</label><input type="text" id="regFullName"></div>
-  <div class="field"><label>Name of Institution *</label><input type="text" id="regInstitution"></div>
-  <div class="field"><label>Email *</label><input type="email" id="regEmail" autocomplete="username"></div>
-  <div class="field"><label>Phone</label><input type="tel" id="regPhone"></div>
-  <div class="field"><label>Password (min 8 characters) *</label><input type="password" id="regPassword" autocomplete="new-password"></div>
-  <button id="registerBtn" style="width:100%">Create account</button>
-  <div id="registerMsg" class="msg" style="display:none"></div>
-  <div class="link-row"><a id="backToLoginFromRegister">Back to login</a></div>
-</div>
-
-<div id="forgotView" class="login-box" style="display:none">
-  <h2>Reset your password</h2>
-  <p style="font-size:13px;color:var(--muted)">Enter your email and we'll send you a link to reset your password.</p>
-  <div class="field"><label>Email</label><input type="email" id="forgotEmail"></div>
-  <button id="forgotBtn" style="width:100%">Send reset link</button>
-  <div id="forgotMsg" class="msg" style="display:none"></div>
-  <div class="link-row"><a id="backToLoginFromForgot">Back to login</a></div>
-</div>
-
-<div id="appView" style="display:none">
-  <header>
-    <h1>Internship Nomination System</h1>
-    <p>Royal Media Services Limited — Placement Officer Submission</p>
-  </header>
-  <div class="wrap narrow">
-
-    <div class="datebar" id="dateBar"></div>
-
-    <div class="account-box">
-      <div class="who">
-        <div><b id="acctName"></b></div>
-        <div id="acctInstitution" style="color:var(--muted)"></div>
-        <div id="acctEmail" style="color:var(--muted)"></div>
-      </div>
-      <button class="ghost small-btn" id="logoutBtn">Log out</button>
+  <div class="marquee-wrap">
+    <p class="marquee-label">INTERN ACROSS OUR FAMILY OF BRANDS</p>
+    <div class="marquee">
+      <div class="marquee-track" id="track"></div>
     </div>
-
-    <div class="card">
-      <h2>Background</h2>
-      <p style="font-size:13px;line-height:1.6">
-        Royal Media Services Limited (RMS) maintains a longstanding commitment to industry leadership by
-        offering highly competitive, structured internship opportunities. Our programme operates in three
-        four-month cohorts: January–April, May–August, and September–December.
-      </p>
-      <p style="font-size:13px;line-height:1.6">
-        RMS is currently preparing to onboard candidates for the <b>September–December 2026 cohort</b>.
-        Please note the following protocols regarding this process:
-      </p>
-      <ul style="font-size:13px;line-height:1.6;padding-left:20px;margin:0">
-        <li><b>Submission Procedure:</b> Applications are accepted exclusively via authorised Placement
-        Officers or Internship Coordinators, who are responsible for vetting all candidates. Direct
-        applications from students will not be accepted.</li>
-        <li><b>Nomination Requirements:</b> Each institution may submit a maximum of 10 nominations in one
-        consolidated package. To ensure comprehensive representation, at least 4 of these nominees must be
-        designated for vernacular media placements.</li>
-        <li><b>Key Dates:</b> All nominations must be submitted on or before <b id="deadlineText">25 July 2026</b>.</li>
-        <li><b>Selection Process:</b> Following a rigorous internal review, shortlisted candidates will be
-        invited to attend interviews, which are scheduled for <b id="interviewText">7 August 2026</b>.</li>
-      </ul>
-    </div>
-
-    <div class="card">
-      <h2>University / College Details</h2>
-      <div class="grid2">
-        <div class="field"><label>Name of Dean / Head of Department (HOD)</label><input type="text" id="hodName"></div>
-        <div class="field"><label>Job Title</label><input type="text" id="hodTitle"></div>
-        <div class="field"><label>Telephone Number</label><input type="tel" id="hodPhone"></div>
-        <div class="field"><label>Email Address</label><input type="email" id="hodEmail"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Section A — Declaration</h2>
-      <div class="decl-row">
-        <span>1. All the nominated students require official industrial attachment/internship to graduate</span>
-        <select id="declFinalYear"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
-      </div>
-      <div class="decl-row">
-        <span>2. The students will be available for the full internship period (September – 31 December 2026) and have no classes during this period</span>
-        <select id="declAvailability"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
-      </div>
-      <div class="decl-row">
-        <span>3. The Institution and the student are aware and understands that this is an unpaid internship</span>
-        <select id="declUnpaid"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
-      </div>
-      <div class="decl-row">
-        <span>4. The student commits to uphold and respect the RMS code of conduct, the RMS guidelines and procedures, as well as the rules and regulations at all times while engaged with RMS</span>
-        <select id="declCodeOfConduct"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Section B — Student Nominations</h2>
-      <p style="font-size:12.5px;color:var(--muted)">Nominate up to a maximum 10 students; minimum 4 for vernacular media placements. Attach a CV (PDF or Word, max <span id="maxCvSize">5</span>MB) for each student if available.</p>
-
-      <p style="font-size:12.5px;color:var(--muted)">Use the excel template below to upload the list of nominated students. Alternatively, key in their details in the form below.</p>
-      <div class="toolbar" style="margin-bottom:14px">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <button class="ghost" id="uploadExcelBtn" type="button">Upload from Excel</button>
-          <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none">
-        </div>
-        <a href="Nomination-Form-Template.xlsx" download style="font-size:12.5px">Download Excel template</a>
-      </div>
-      <div id="importMsg" class="msg" style="display:none;white-space:pre-line"></div>
-
-      <div id="studentsContainer"></div>
-      <button class="ghost" id="addStudentBtn" type="button">+ Add another student</button>
-
-      <div class="summary-box">
-        <div class="item"><b id="sumTotal">0</b><span>Students nominated</span></div>
-        <div class="item"><b id="sumVern">0</b><span>Vernacular placements</span></div>
-        <div class="item"><span id="sumStatus" class="status-pill bad">Add students to begin</span></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Section C — Final Declaration</h2>
-      <div class="decl-row">
-        <span>1. The institution has not nominated more than ten (10) students — verified automatically</span>
-        <span id="autoCompliance" class="badge no">No</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <button id="submitBtn" style="width:100%">Submit Nomination</button>
-      <div id="submitMsg" class="msg" style="display:none"></div>
-    </div>
-
   </div>
 </div>
 
 <script>
-let AUTH = JSON.parse(sessionStorage.getItem('facilitatorAuth') || 'null');
-let META = null;
-let studentCount = 0;
-const MAX_STUDENTS = 10;
-
-async function api(path, opts = {}) {
-  opts.headers = opts.headers || {};
-  if (AUTH && AUTH.token) opts.headers['Authorization'] = 'Bearer ' + AUTH.token;
-  const res = await fetch('/api' + path, opts);
-  const isJson = (res.headers.get('content-type') || '').includes('application/json');
-  const body = isJson ? await res.json() : await res.text();
-  if (!res.ok) { const err = new Error((body && body.error) || 'Request failed'); err.body = body; throw err; }
-  return body;
-}
-
-function fmtDate(iso) {
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
-}
-
-async function loadMeta() {
-  META = await api('/meta');
-  document.getElementById('deadlineText').textContent = fmtDate(META.deadline);
-  document.getElementById('interviewText').textContent = fmtDate(META.interviewDate);
-  document.getElementById('maxCvSize').textContent = META.maxCvSizeMb;
-  const now = new Date();
-  const deadline = new Date(META.deadline + 'T23:59:59');
-  const daysLeft = Math.ceil((deadline - now) / 86400000);
-  let cls = 'ok';
-  if (daysLeft < 0) cls = 'late'; else if (daysLeft <= 5) cls = 'warn';
-  const label = daysLeft < 0 ? `${Math.abs(daysLeft)} day(s) past deadline` : `${daysLeft} day(s) remaining`;
-  document.getElementById('dateBar').innerHTML =
-    `<div><b>Nomination deadline:</b> ${fmtDate(META.deadline)}</div>
-     <div class="days ${cls}"><b>${label}</b></div>
-     <div><b>Interview date:</b> ${fmtDate(META.interviewDate)}</div>`;
-}
-
-function studentCardHtml(index) {
-  const deptOptions = META.departments.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
-  return `
-  <div class="student-card" data-index="${index}">
-    <span class="num">Student ${index + 1}</span>
-    <button type="button" class="danger remove-btn" onclick="removeStudent(${index})">Remove</button>
-    <div class="grid2">
-      <div class="field"><label>Full Name *</label><input type="text" class="s-name"></div>
-      <div class="field"><label>Gender *</label>
-        <select class="s-gender"><option value="">Select</option><option>Male</option><option>Female</option></select>
-      </div>
-      <div class="field"><label>National ID Number</label><input type="text" class="s-nid"></div>
-      <div class="field"><label>Phone Number</label><input type="tel" class="s-phone"></div>
-      <div class="field"><label>Email Address</label><input type="email" class="s-email"></div>
-      <div class="field"><label>Year of Study</label><input type="text" class="s-year" placeholder="e.g. 4"></div>
-      <div class="field"><label>Course Undertaken</label><input type="text" class="s-course" placeholder="e.g. Bachelor of Journalism"></div>
-      <div class="field"><label>Departments at RMS *</label>
-        <select class="s-dept" onchange="onDeptChange(${index})"><option value="">Select department</option>${deptOptions}</select>
-      </div>
-      <div class="field"><label>Area of Interest *</label>
-        <select class="s-area" onchange="updateVernacularUI(${index})"><option value="">Select department first</option></select>
-      </div>
-      <div class="field"><label>Vernacular Placement?</label>
-        <select class="s-vern" onchange="updateVernacularUI(${index})"><option value="No">No</option><option value="Yes">Yes</option></select>
-      </div>
-      <div class="field s-vern-lang-wrap" style="display:none"><label>Vernacular Language</label>
-        <select class="s-vern-lang"></select>
-      </div>
-      <div class="field"><label>CV (PDF or Word)</label><input type="file" class="s-cv" accept=".pdf,.doc,.docx"></div>
-    </div>
-  </div>`;
-}
-
-function onDeptChange(index) {
-  const card = document.querySelector(`.student-card[data-index="${index}"]`);
-  const deptVal = card.querySelector('.s-dept').value;
-  const areaSel = card.querySelector('.s-area');
-  const dept = META.departments.find(d => d.name === deptVal);
-  areaSel.innerHTML = dept
-    ? '<option value="">Select area</option>' + dept.areas.map(a => `<option>${a}</option>`).join('')
-    : '<option value="">Select department first</option>';
-  updateVernacularUI(index);
-}
-
-function updateVernacularUI(index) {
-  const card = document.querySelector(`.student-card[data-index="${index}"]`);
-  if (!card) return;
-  const dept = card.querySelector('.s-dept').value;
-  const area = card.querySelector('.s-area').value;
-  const vernSel = card.querySelector('.s-vern');
-  const langWrap = card.querySelector('.s-vern-lang-wrap');
-  const langSel = card.querySelector('.s-vern-lang');
-  const rules = META.vernacularRules;
-
-  const tvAreaLang = rules.TV_VERNACULAR_AREA_LANGUAGE[area];
-  const isTvVernacular = rules.TV_VERNACULAR_DEPARTMENTS.includes(dept) && tvAreaLang;
-
-  if (isTvVernacular) {
-    vernSel.value = 'Yes';
-    langWrap.style.display = '';
-    const langs = Array.from(new Set(Object.values(rules.TV_VERNACULAR_AREA_LANGUAGE)));
-    langSel.innerHTML = '<option value="">Select language</option>' + langs.map(l => `<option>${l}</option>`).join('');
-    langSel.value = tvAreaLang;
-  } else if (rules.RADIO_DIGITAL_VERNACULAR_DEPARTMENTS.includes(dept) && vernSel.value === 'Yes') {
-    langWrap.style.display = '';
-    const prev = langSel.value;
-    langSel.innerHTML = '<option value="">Select language</option>' + rules.RADIO_DIGITAL_VERNACULAR_LANGUAGES.map(l => `<option>${l}</option>`).join('');
-    langSel.value = rules.RADIO_DIGITAL_VERNACULAR_LANGUAGES.includes(prev) ? prev : '';
-  } else {
-    langWrap.style.display = 'none';
-    langSel.innerHTML = '';
-  }
-  updateSummary();
-}
-
-function addStudent() {
-  if (studentCount >= MAX_STUDENTS) return;
-  const container = document.getElementById('studentsContainer');
-  const div = document.createElement('div');
-  div.innerHTML = studentCardHtml(studentCount);
-  container.appendChild(div.firstElementChild);
-  studentCount++;
-  updateSummary();
-  document.getElementById('addStudentBtn').disabled = studentCount >= MAX_STUDENTS;
-}
-
-function removeStudent(index) {
-  const card = document.querySelector(`.student-card[data-index="${index}"]`);
-  if (card) card.remove();
-  updateSummary();
-  document.getElementById('addStudentBtn').disabled = document.querySelectorAll('.student-card').length >= MAX_STUDENTS;
-}
-
-function collectStudents() {
-  return Array.from(document.querySelectorAll('.student-card')).map(card => ({
-    name: card.querySelector('.s-name').value.trim(),
-    gender: card.querySelector('.s-gender').value,
-    nationalId: card.querySelector('.s-nid').value.trim(),
-    phone: card.querySelector('.s-phone').value.trim(),
-    email: card.querySelector('.s-email').value.trim(),
-    year: card.querySelector('.s-year').value.trim(),
-    course: card.querySelector('.s-course').value.trim(),
-    department: card.querySelector('.s-dept').value,
-    area: card.querySelector('.s-area').value,
-    vernacular: card.querySelector('.s-vern').value,
-    vernacularLanguage: card.querySelector('.s-vern-lang').value,
-    cvInput: card.querySelector('.s-cv'),
-  })).filter(s => s.name);
-}
-
-function updateSummary() {
-  const students = collectStudents();
-  const total = students.length;
-  const vern = students.filter(s => s.vernacular === 'Yes').length;
-  document.getElementById('sumTotal').textContent = total;
-  document.getElementById('sumVern').textContent = vern;
-  const pill = document.getElementById('sumStatus');
-  const compliant = total > 0 && total <= 10 && vern >= 4;
-  pill.textContent = total === 0 ? 'Add students to begin'
-    : compliant ? 'Ready to submit'
-    : total > 10 ? 'Exceeds 10-student limit'
-    : 'Below 4-student vernacular minimum';
-  pill.className = 'status-pill ' + (compliant ? 'ok' : 'bad');
-  const autoBadge = document.getElementById('autoCompliance');
-  const maxOk = total <= 10;
-  autoBadge.textContent = maxOk ? 'Yes' : 'No';
-  autoBadge.className = 'badge ' + (maxOk ? 'yes' : 'no');
-}
-
-document.getElementById('addStudentBtn').addEventListener('click', addStudent);
-document.getElementById('studentsContainer').addEventListener('input', updateSummary);
-document.getElementById('studentsContainer').addEventListener('change', updateSummary);
-
-// ---- Upload from Excel ----
-
-const EXCEL_HEADER_MAP = {
-  'full name': 'name',
-  'gender': 'gender',
-  'national id number': 'nationalId',
-  'phone number': 'phone',
-  'email address': 'email',
-  'year of study': 'year',
-  'course': 'course',
-  'department': 'department',
-  'area of interest': 'area',
-};
-
-function excelNormGender(raw) {
-  const v = String(raw || '').trim().toLowerCase();
-  if (!v) return { value: '', ok: true };
-  if (v === 'm' || v === 'male') return { value: 'Male', ok: true };
-  if (v === 'f' || v === 'female') return { value: 'Female', ok: true };
-  return { value: '', ok: false, raw };
-}
-
-function excelNormVernacular(raw) {
-  const v = String(raw || '').trim().toLowerCase();
-  if (v === 'y' || v === 'yes') return { value: 'Yes', ok: true };
-  if (v === 'n' || v === 'no' || v === '') return { value: 'No', ok: true };
-  return { value: 'No', ok: false, raw };
-}
-
-function excelMatchDepartment(raw) {
-  const v = String(raw || '').trim().toLowerCase();
-  if (!v) return { dept: null, ok: true };
-  const dept = META.departments.find(d => d.name.trim().toLowerCase() === v);
-  if (dept) return { dept, ok: true };
-  return { dept: null, ok: false, raw };
-}
-
-function excelMatchArea(dept, raw) {
-  const v = String(raw || '').trim();
-  if (!v) return { value: '', ok: true };
-  if (!dept) return { value: v, ok: false, raw: v };
-  const found = dept.areas.find(a => a.trim().toLowerCase() === v.toLowerCase());
-  if (found) return { value: found, ok: true };
-  return { value: v, ok: false, raw: v };
-}
-
-function parseNominationWorkbook(arrayBuffer) {
-  const wb = XLSX.read(arrayBuffer, { type: 'array' });
-  const sheetName = wb.SheetNames.includes('Nomination Form') ? 'Nomination Form' : wb.SheetNames[0];
-  const sheet = wb.Sheets[sheetName];
-  const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', blankrows: false });
-
-  let headerRowIdx = -1;
-  const colIndex = {};
-  for (let i = 0; i < rows.length; i++) {
-    const norm = rows[i].map(c => String(c || '').trim().toLowerCase());
-    if (norm.includes('full name')) {
-      headerRowIdx = i;
-      norm.forEach((h, idx) => {
-        const cleaned = h.replace(/\s+/g, ' ').trim();
-        if (cleaned.startsWith('vernacular language')) { colIndex.vernacularLanguage = idx; return; }
-        if (cleaned.startsWith('vernacular')) { colIndex.vernacular = idx; return; }
-        for (const key in EXCEL_HEADER_MAP) {
-          if (cleaned.startsWith(key)) colIndex[EXCEL_HEADER_MAP[key]] = idx;
-        }
-      });
-      break;
-    }
-  }
-  if (headerRowIdx === -1 || colIndex.name === undefined) {
-    throw new Error('Could not find a "Full Name" column. Make sure you are uploading the Section B student table from the nomination template.');
-  }
-
-  const students = [];
-  const warnings = [];
-  for (let i = headerRowIdx + 1; i < rows.length && students.length < MAX_STUDENTS; i++) {
-    const row = rows[i];
-    const name = String(row[colIndex.name] || '').trim();
-    if (!name) continue;
-
-    const genderR = excelNormGender(row[colIndex.gender]);
-    const vernR = excelNormVernacular(row[colIndex.vernacular]);
-    const deptR = excelMatchDepartment(row[colIndex.department]);
-    const areaR = excelMatchArea(deptR.dept, row[colIndex.area]);
-    const vernLang = colIndex.vernacularLanguage !== undefined ? String(row[colIndex.vernacularLanguage] || '').trim() : '';
-
-    if (!genderR.ok) warnings.push(`"${name}": gender "${genderR.raw}" not recognised — select manually.`);
-    if (!vernR.ok) warnings.push(`"${name}": vernacular value "${vernR.raw}" not recognised — defaulted to No, check manually.`);
-    if (!deptR.ok) warnings.push(`"${name}": department "${deptR.raw}" not recognised — select manually.`);
-    if (!areaR.ok) warnings.push(`"${name}": area of interest "${areaR.raw}" not in the list for that department — check manually.`);
-
-    students.push({
-      name,
-      gender: genderR.value,
-      nationalId: String(row[colIndex.nationalId] || '').trim(),
-      phone: String(row[colIndex.phone] || '').trim(),
-      email: String(row[colIndex.email] || '').trim(),
-      year: String(row[colIndex.year] || '').trim(),
-      course: colIndex.course !== undefined ? String(row[colIndex.course] || '').trim() : '',
-      department: deptR.dept ? deptR.dept.name : String(row[colIndex.department] || '').trim(),
-      area: areaR.value,
-      vernacular: vernR.value,
-      vernacularLanguage: vernLang,
-    });
-  }
-  if (!students.length) {
-    throw new Error('No student rows were found under the "Full Name" column. Add at least one student to the sheet before uploading.');
-  }
-  return { students, warnings };
-}
-
-function fillStudentCard(index, data) {
-  const card = document.querySelector(`.student-card[data-index="${index}"]`);
-  if (!card) return;
-  card.querySelector('.s-name').value = data.name || '';
-  card.querySelector('.s-nid').value = data.nationalId || '';
-  card.querySelector('.s-phone').value = data.phone || '';
-  card.querySelector('.s-email').value = data.email || '';
-  card.querySelector('.s-year').value = data.year || '';
-  card.querySelector('.s-course').value = data.course || '';
-
-  const genderSel = card.querySelector('.s-gender');
-  if (data.gender) genderSel.value = data.gender;
-
-  const deptSel = card.querySelector('.s-dept');
-  const deptMatch = META.departments.find(d => d.name === data.department);
-  if (deptMatch) {
-    deptSel.value = deptMatch.name;
-  } else if (data.department) {
-    const opt = document.createElement('option');
-    opt.value = data.department;
-    opt.textContent = data.department + ' (not in list — check manually)';
-    deptSel.appendChild(opt);
-    deptSel.value = data.department;
-  }
-  onDeptChange(index);
-
-  const areaSel = card.querySelector('.s-area');
-  if (data.area) {
-    const hasOption = Array.from(areaSel.options).some(o => o.value === data.area);
-    if (!hasOption) {
-      const opt = document.createElement('option');
-      opt.value = data.area;
-      opt.textContent = data.area + ' (not in list — check manually)';
-      areaSel.appendChild(opt);
-    }
-    areaSel.value = data.area;
-  }
-
-  card.querySelector('.s-vern').value = data.vernacular || 'No';
-  updateVernacularUI(index);
-
-  if (data.vernacularLanguage) {
-    const langSel = card.querySelector('.s-vern-lang');
-    const hasLangOption = Array.from(langSel.options).some(o => o.value === data.vernacularLanguage);
-    if (!hasLangOption) {
-      card.querySelector('.s-vern-lang-wrap').style.display = '';
-      const opt = document.createElement('option');
-      opt.value = data.vernacularLanguage;
-      opt.textContent = data.vernacularLanguage + ' (not in list — check manually)';
-      langSel.appendChild(opt);
-    }
-    langSel.value = data.vernacularLanguage;
-  }
-}
-
-function showImportMsg(text, ok) {
-  const msg = document.getElementById('importMsg');
-  msg.textContent = text;
-  msg.className = 'msg ' + (ok ? 'ok' : 'err');
-  msg.style.display = 'block';
-  msg.scrollIntoView({ behavior: 'smooth' });
-}
-
-document.getElementById('uploadExcelBtn').addEventListener('click', () => {
-  document.getElementById('excelFileInput').click();
-});
-
-document.getElementById('excelFileInput').addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  e.target.value = '';
-  if (!file) return;
-
-  const existing = collectStudents();
-  const hasData = existing.some(s => s.name || s.email || s.phone);
-  if (hasData && !confirm('This will replace the students currently on the form with the ones from the Excel file. Continue?')) {
-    return;
-  }
-
-  try {
-    const arrayBuffer = await file.arrayBuffer();
-    const { students, warnings } = parseNominationWorkbook(arrayBuffer);
-
-    document.getElementById('studentsContainer').innerHTML = '';
-    studentCount = 0;
-    students.forEach((s) => {
-      addStudent();
-      fillStudentCard(studentCount - 1, s);
-    });
-    updateSummary();
-
-    const summary = `Imported ${students.length} student(s) from the Excel file.`;
-    showImportMsg(warnings.length ? `${summary}\n\n${warnings.length} row(s) need a manual check:\n${warnings.join('\n')}` : summary, warnings.length === 0);
-  } catch (err) {
-    showImportMsg(err.message, false);
-  }
-});
-
-document.getElementById('submitBtn').addEventListener('click', async () => {
-  const msg = document.getElementById('submitMsg');
-  msg.style.display = 'none';
-  const students = collectStudents();
-  if (students.length === 0) return showMsg('Add at least one student.', false);
-  if (students.length > 10) return showMsg('A maximum of 10 students may be nominated.', false);
-
-  const fd = new FormData();
-  fd.append('declarationFinalYear', document.getElementById('declFinalYear').value);
-  fd.append('declarationAvailability', document.getElementById('declAvailability').value);
-  fd.append('declarationUnpaid', document.getElementById('declUnpaid').value);
-  fd.append('declarationCodeOfConduct', document.getElementById('declCodeOfConduct').value);
-  fd.append('hodName', document.getElementById('hodName').value.trim());
-  fd.append('hodTitle', document.getElementById('hodTitle').value.trim());
-  fd.append('hodPhone', document.getElementById('hodPhone').value.trim());
-  fd.append('hodEmail', document.getElementById('hodEmail').value.trim());
-
-  const studentsPayload = students.map(({ cvInput, ...rest }) => rest);
-  fd.append('studentsJson', JSON.stringify(studentsPayload));
-  students.forEach((s, i) => {
-    if (s.cvInput.files[0]) fd.append(`cv_${i}`, s.cvInput.files[0]);
+  var LOGOS = [
+    ['assets/citizen-tv.png','Citizen TV'],['assets/radio-citizen.png','Radio Citizen'],
+    ['assets/hot96.png','Hot 96'],['assets/inooro-tv.png','Inooro TV'],
+    ['assets/inooro-fm.png','Inooro FM'],['assets/ramogi-tv.png','Ramogi TV'],
+    ['assets/ramogi-fm.png','Ramogi FM'],['assets/citizen-digital.png','Citizen Digital'],
+    ['assets/egesa.png','Egesa FM'],['assets/mulembe.png','Mulembe FM'],
+    ['assets/musyi.png','Musyi FM'],['assets/muuga.png','Muuga FM'],
+    ['assets/chamgei.png','Chamgei FM'],['assets/radio-maa.png','Radio Maa'],
+    ['assets/sulwe.png','Sulwe FM'],['assets/wimwaro.png','Wimwaro FM'],
+    ['assets/vuuka.png','Vuuka FM'],['assets/bahari.png','Bahari FM'],
+    ['assets/bilito.png','Bilito FM'],['assets/magalata.png','Magalata FM'],
+    ['assets/viusasa.png','Viusasa'],['assets/citizen-duka.png','Citizen Duka']
+  ];
+  var track = document.getElementById('track');
+  // duplicate the set so the -50% loop is seamless
+  LOGOS.concat(LOGOS).forEach(function(l){
+    var img = document.createElement('img');
+    img.src = l[0]; img.alt = l[1];
+    track.appendChild(img);
   });
-
-  document.getElementById('submitBtn').disabled = true;
-  document.getElementById('submitBtn').textContent = 'Submitting...';
-  try {
-    const result = await api('/nominations', { method: 'POST', body: fd });
-    showMsg(`Submitted successfully. ${result.studentsCount} student(s) recorded` +
-      (result.vernacularCompliant ? '' : ' — note: fewer than 4 vernacular placements were nominated.'), true);
-  } catch (e) {
-    showMsg(e.message, false);
-  } finally {
-    document.getElementById('submitBtn').disabled = false;
-    document.getElementById('submitBtn').textContent = 'Submit Nomination';
-  }
-});
-
-function showMsg(text, ok) {
-  const msg = document.getElementById('submitMsg');
-  msg.textContent = text;
-  msg.className = 'msg ' + (ok ? 'ok' : 'err');
-  msg.style.display = 'block';
-  msg.scrollIntoView({ behavior: 'smooth' });
-}
-
-// ---- Auth: login / register / forgot password ----
-
-function showView(name) {
-  ['loginView', 'registerView', 'forgotView', 'appView'].forEach(v => {
-    document.getElementById(v).style.display = v === name ? (name === 'appView' ? 'block' : 'block') : 'none';
-  });
-}
-
-document.getElementById('goRegister').addEventListener('click', () => showView('registerView'));
-document.getElementById('goForgot').addEventListener('click', () => showView('forgotView'));
-document.getElementById('backToLoginFromRegister').addEventListener('click', () => showView('loginView'));
-document.getElementById('backToLoginFromForgot').addEventListener('click', () => showView('loginView'));
-
-document.getElementById('loginBtn').addEventListener('click', doLogin);
-[document.getElementById('loginEmail'), document.getElementById('loginPassword')].forEach(el =>
-  el.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
-
-let lastLoginEmail = '';
-
-async function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  lastLoginEmail = email;
-  const msg = document.getElementById('loginMsg');
-  const resendRow = document.getElementById('resendRow');
-  msg.style.display = 'none';
-  resendRow.style.display = 'none';
-  try {
-    const result = await api('/auth/login', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    AUTH = result;
-    sessionStorage.setItem('facilitatorAuth', JSON.stringify(AUTH));
-    await enterApp();
-  } catch (e) {
-    msg.textContent = e.message;
-    msg.style.display = 'block';
-    if (e.body && e.body.needsVerification) resendRow.style.display = 'block';
-  }
-}
-
-document.getElementById('resendLink').addEventListener('click', async () => {
-  try {
-    const r = await api('/auth/resend-verification', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: lastLoginEmail }),
-    });
-    alert(r.message);
-  } catch (e) { alert(e.message); }
-});
-
-document.getElementById('registerBtn').addEventListener('click', async () => {
-  const msg = document.getElementById('registerMsg');
-  msg.style.display = 'none';
-  const payload = {
-    fullName: document.getElementById('regFullName').value.trim(),
-    institutionName: document.getElementById('regInstitution').value.trim(),
-    email: document.getElementById('regEmail').value.trim(),
-    phone: document.getElementById('regPhone').value.trim(),
-    password: document.getElementById('regPassword').value,
-  };
-  try {
-    const r = await api('/auth/register', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    msg.textContent = r.message;
-    msg.className = 'msg ok';
-    msg.style.display = 'block';
-  } catch (e) {
-    msg.textContent = e.message;
-    msg.className = 'msg err';
-    msg.style.display = 'block';
-  }
-});
-
-document.getElementById('forgotBtn').addEventListener('click', async () => {
-  const msg = document.getElementById('forgotMsg');
-  msg.style.display = 'none';
-  try {
-    const r = await api('/auth/forgot-password', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: document.getElementById('forgotEmail').value.trim() }),
-    });
-    msg.textContent = r.message;
-    msg.className = 'msg ok';
-    msg.style.display = 'block';
-  } catch (e) {
-    msg.textContent = e.message;
-    msg.className = 'msg err';
-    msg.style.display = 'block';
-  }
-});
-
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  sessionStorage.removeItem('facilitatorAuth');
-  AUTH = null;
-  location.reload();
-});
-
-async function enterApp() {
-  showView('appView');
-  document.getElementById('acctName').textContent = AUTH.fullName;
-  document.getElementById('acctInstitution').textContent = AUTH.institutionName;
-  document.getElementById('acctEmail').textContent = AUTH.email;
-  await loadMeta();
-  addStudent();
-}
-
-(async function init() {
-  if (AUTH && AUTH.token) {
-    try { await enterApp(); return; } catch (e) { sessionStorage.removeItem('facilitatorAuth'); AUTH = null; }
-  }
-  showView('loginView');
-})();
 </script>
 </body>
 </html>
