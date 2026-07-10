@@ -12,7 +12,7 @@
 </head>
 <body>
 
-<div class="top-logo-bar">
+<div class="top-logo-bar" id="topLogoBar">
   <a href="index.html"><img src="assets/citizen-logo.png" alt="Citizen Television"></a>
 </div>
 
@@ -55,21 +55,23 @@
 
 <div id="appView" style="display:none">
   <header>
-    <h1>Internship Nomination System</h1>
-    <p>Royal Media Services Limited — Placement Officer Submission</p>
+    <div class="header-text">
+      <h1>Internship Nomination System</h1>
+      <p>Royal Media Services Limited — Placement Officer Submission</p>
+      <div class="header-account">
+        <div class="who">
+          <div><b id="acctName"></b></div>
+          <div id="acctInstitution" style="color:var(--muted)"></div>
+          <div id="acctEmail" style="color:var(--muted)"></div>
+        </div>
+        <button class="ghost small-btn" id="logoutBtn">Log out</button>
+      </div>
+    </div>
+    <a class="header-logo" href="index.html"><img src="assets/citizen-logo.png" alt="Citizen Television"></a>
   </header>
   <div class="wrap narrow">
 
     <div class="datebar" id="dateBar"></div>
-
-    <div class="account-box">
-      <div class="who">
-        <div><b id="acctName"></b></div>
-        <div id="acctInstitution" style="color:var(--muted)"></div>
-        <div id="acctEmail" style="color:var(--muted)"></div>
-      </div>
-      <button class="ghost small-btn" id="logoutBtn">Log out</button>
-    </div>
 
     <div class="card">
       <h2>Background</h2>
@@ -130,12 +132,12 @@
       <p style="font-size:12.5px;color:var(--muted)">Nominate up to a maximum 10 students; minimum 4 for vernacular media placements. Attach a CV (PDF or Word, max <span id="maxCvSize">5</span>MB) for each student if available.</p>
 
       <p style="font-size:12.5px;color:var(--muted)">Use the excel template below to upload the list of nominated students. Alternatively, key in their details in the form below.</p>
-      <div class="toolbar" style="margin-bottom:14px">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <div class="toolbar" style="margin-bottom:14px;justify-content:flex-start">
+        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
           <button class="ghost" id="uploadExcelBtn" type="button">Upload from Excel</button>
           <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none">
+          <a href="Nomination-Form-Template.xlsx" download style="font-size:12.5px">Download Excel template</a>
         </div>
-        <a href="Nomination-Form-Template.xlsx" download style="font-size:12.5px">Download Excel template</a>
       </div>
       <div id="importMsg" class="msg" style="display:none;white-space:pre-line"></div>
 
@@ -162,6 +164,13 @@
       <div id="submitMsg" class="msg" style="display:none"></div>
     </div>
 
+  </div>
+
+  <div class="marquee-wrap">
+    <p class="marquee-label">INTERN ACROSS OUR FAMILY OF BRANDS</p>
+    <div class="marquee">
+      <div class="marquee-track" id="appTrack"></div>
+    </div>
   </div>
 </div>
 
@@ -595,7 +604,30 @@ function showView(name) {
   ['loginView', 'registerView', 'forgotView', 'appView'].forEach(v => {
     document.getElementById(v).style.display = v === name ? (name === 'appView' ? 'block' : 'block') : 'none';
   });
+  document.getElementById('topLogoBar').style.display = name === 'appView' ? 'none' : 'flex';
 }
+
+var APP_LOGOS = [
+  ['assets/citizen-tv.png','Citizen TV'],['assets/radio-citizen.png','Radio Citizen'],
+  ['assets/hot96.png','Hot 96'],['assets/inooro-tv.png','Inooro TV'],
+  ['assets/inooro-fm.png','Inooro FM'],['assets/ramogi-tv.png','Ramogi TV'],
+  ['assets/ramogi-fm.png','Ramogi FM'],['assets/citizen-digital.png','Citizen Digital'],
+  ['assets/egesa.png','Egesa FM'],['assets/mulembe.png','Mulembe FM'],
+  ['assets/musyi.png','Musyi FM'],['assets/muuga.png','Muuga FM'],
+  ['assets/chamgei.png','Chamgei FM'],['assets/radio-maa.png','Radio Maa'],
+  ['assets/sulwe.png','Sulwe FM'],['assets/wimwaro.png','Wimwaro FM'],
+  ['assets/vuuka.png','Vuuka FM'],['assets/bahari.png','Bahari FM'],
+  ['assets/bilito.png','Bilito FM'],['assets/magalata.png','Magalata FM'],
+  ['assets/viusasa.png','Viusasa'],['assets/citizen-duka.png','Citizen Duka']
+];
+(function(){
+  var appTrack = document.getElementById('appTrack');
+  APP_LOGOS.concat(APP_LOGOS).forEach(function(l){
+    var img = document.createElement('img');
+    img.src = l[0]; img.alt = l[1];
+    appTrack.appendChild(img);
+  });
+})();
 
 document.getElementById('goRegister').addEventListener('click', () => showView('registerView'));
 document.getElementById('goForgot').addEventListener('click', () => showView('forgotView'));
