@@ -74,7 +74,7 @@
         <div class="tablewrap">
           <table id="instTable">
             <thead><tr>
-              <th>Institution</th><th>Officer</th><th>Contact</th><th>Students</th>
+              <th>Institution</th><th>Officer</th><th>Contact</th><th>Dean / HOD</th><th>Students</th>
               <th>Vernacular</th><th>Max 10</th><th>Min 4 Vern.</th><th>CVs</th><th>Interview Status</th><th></th>
             </tr></thead>
             <tbody></tbody>
@@ -92,8 +92,8 @@
         <div class="tablewrap">
           <table id="masterTable">
             <thead><tr>
-              <th>#</th><th>Institution</th><th>Full Name</th><th>Gender</th><th>Department</th>
-              <th>Area of Interest</th><th>Vernacular</th><th>CV</th><th>Interview Outcome</th>
+              <th>#</th><th>Institution</th><th>Full Name</th><th>Gender</th><th>Course</th><th>Department</th>
+              <th>Area of Interest</th><th>Vernacular</th><th>Vern. Language</th><th>CV</th><th>Interview Outcome</th>
             </tr></thead>
             <tbody></tbody>
           </table>
@@ -162,8 +162,8 @@ async function renderDateBar(meta) {
   const label = daysLeft < 0 ? `${Math.abs(daysLeft)} day(s) past deadline` : `${daysLeft} day(s) remaining`;
   document.getElementById('dateBar').innerHTML =
     `<div><b>Nomination deadline:</b> ${fmtDate(meta.deadline)}</div>
-     <div><b>Interview date:</b> ${fmtDate(meta.interviewDate)}</div>
-     <div class="days ${cls}"><b>${label}</b></div>`;
+     <div class="days ${cls}"><b>${label}</b></div>
+     <div><b>Interview date:</b> ${fmtDate(meta.interviewDate)}</div>`;
 }
 
 async function loadAll() {
@@ -220,11 +220,14 @@ function renderInstitutions(insts) {
   insts.forEach(r => {
     const maxOk = r.students_count <= 10;
     const vernOk = r.vernacular_count >= 4;
+    const hodLine1 = [r.hod_name, r.hod_title].filter(Boolean).join(' — ');
+    const hodLine2 = [r.hod_phone, r.hod_email].filter(Boolean).join(' / ');
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${r.name}</td>
       <td>${r.officer_name || ''}</td>
       <td>${r.officer_email || ''}${r.officer_phone ? '<br>'+r.officer_phone : ''}</td>
+      <td>${hodLine1}${hodLine1 && hodLine2 ? '<br>' : ''}${hodLine2}</td>
       <td>${r.students_count} / 10</td>
       <td>${r.vernacular_count} / 4</td>
       <td><span class="badge ${maxOk?'yes':'no'}">${maxOk?'Yes':'No'}</span></td>
@@ -245,7 +248,7 @@ function renderInstitutions(insts) {
         body: JSON.stringify({ interviewStatus: sel.value }),
       });
     });
-    tr.children[8].appendChild(sel);
+    tr.children[9].appendChild(sel);
     tr.querySelector('button.danger').addEventListener('click', async () => {
       if (confirm(`Remove all nominations for "${r.name}"? This cannot be undone.`)) {
         await api(`/institutions/${r.id}`, { method: 'DELETE' });
@@ -258,7 +261,7 @@ function renderInstitutions(insts) {
 
 function renderMaster(students, filter) {
   const term = (filter !== undefined ? filter : (document.getElementById('searchBox').value || '')).toLowerCase();
-  const filtered = students.filter(s => !term || [s.institution_name, s.full_name, s.department, s.area_of_interest, s.gender].join(' ').toLowerCase().includes(term));
+  const filtered = students.filter(s => !term || [s.institution_name, s.full_name, s.department, s.area_of_interest, s.gender, s.course].join(' ').toLowerCase().includes(term));
   const body = document.querySelector('#masterTable tbody');
   body.innerHTML = '';
   document.getElementById('masterEmpty').style.display = filtered.length ? 'none' : 'block';
@@ -267,8 +270,9 @@ function renderMaster(students, filter) {
     const tr = document.createElement('tr');
     const cv = s.has_cv ? `<a href="/api/students/${s.id}/cv?token=${encodeURIComponent(AUTH.token)}" target="_blank">Download</a>` : '<span style="color:var(--muted)">None</span>';
     tr.innerHTML = `<td>${i+1}</td><td>${s.institution_name}</td><td>${s.full_name}</td><td>${s.gender||''}</td>
-      <td>${s.department||''}</td><td>${s.area_of_interest||''}</td>
+      <td>${s.course||''}</td><td>${s.department||''}</td><td>${s.area_of_interest||''}</td>
       <td><span class="badge ${String(s.vernacular)==='true'?'yes':'no'}">${s.vernacular?'Yes':'No'}</span></td>
+      <td>${s.vernacular_language||''}</td>
       <td>${cv}</td><td></td>`;
     const sel = document.createElement('select');
     ['Pending','Shortlisted','Not Shortlisted'].forEach(opt => {
@@ -280,7 +284,7 @@ function renderMaster(students, filter) {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ interviewOutcome: sel.value }),
     }));
-    tr.children[8].appendChild(sel);
+    tr.children[10].appendChild(sel);
     body.appendChild(tr);
   });
 }

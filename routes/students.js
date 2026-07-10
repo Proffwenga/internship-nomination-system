@@ -7,7 +7,7 @@ const { requireRole } = require('../auth');
 router.get('/students', requireRole('hr', 'admin'), async (req, res) => {
   const { rows } = await pool.query(`
     SELECT s.id, s.full_name, s.gender, s.national_id, s.phone, s.email, s.year_of_study,
-           s.department, s.area_of_interest, s.vernacular, s.interview_outcome,
+           s.course, s.department, s.area_of_interest, s.vernacular, s.vernacular_language, s.interview_outcome,
            (s.cv_data IS NOT NULL) AS has_cv, s.cv_filename,
            i.id AS institution_id, i.name AS institution_name
     FROM students s

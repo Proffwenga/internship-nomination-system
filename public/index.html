@@ -67,40 +67,66 @@
     <div class="card">
       <h2>Background</h2>
       <p style="font-size:13px;line-height:1.6">
-        Royal Media Services Limited is preparing to onboard interns for the <b>September–December 2026 Internship
-        Cohort</b> under its structured internship programme. Submissions are made exclusively by authorised
-        Placement Officers or Internship Coordinators — students may not apply directly. Each institution may
-        nominate up to <b>10 students</b>, including at least <b>4 for vernacular media placements</b>, in one
-        consolidated submission on or before <b id="deadlineText">19th July 2026</b>. Interviews are scheduled
-        for <b id="interviewText">7th August 2026</b>.
+        Royal Media Services Limited (RMS) maintains a longstanding commitment to industry leadership by
+        offering highly competitive, structured internship opportunities. Our programme operates in three
+        four-month cohorts: January–April, May–August, and September–December.
       </p>
+      <p style="font-size:13px;line-height:1.6">
+        RMS is currently preparing to onboard candidates for the <b>September–December 2026 cohort</b>.
+        Please note the following protocols regarding this process:
+      </p>
+      <ul style="font-size:13px;line-height:1.6;padding-left:20px;margin:0">
+        <li><b>Submission Procedure:</b> Applications are accepted exclusively via authorised Placement
+        Officers or Internship Coordinators, who are responsible for vetting all candidates. Direct
+        applications from students will not be accepted.</li>
+        <li><b>Nomination Requirements:</b> Each institution may submit a maximum of 10 nominations in one
+        consolidated package. To ensure comprehensive representation, at least 4 of these nominees must be
+        designated for vernacular media placements.</li>
+        <li><b>Key Dates:</b> All nominations must be submitted on or before <b id="deadlineText">25 July 2026</b>.</li>
+        <li><b>Selection Process:</b> Following a rigorous internal review, shortlisted candidates will be
+        invited to attend interviews, which are scheduled for <b id="interviewText">7 August 2026</b>.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>University / College Details</h2>
+      <div class="grid2">
+        <div class="field"><label>Name of Dean / Head of Department (HOD)</label><input type="text" id="hodName"></div>
+        <div class="field"><label>Job Title</label><input type="text" id="hodTitle"></div>
+        <div class="field"><label>Telephone Number</label><input type="tel" id="hodPhone"></div>
+        <div class="field"><label>Email Address</label><input type="email" id="hodEmail"></div>
+      </div>
     </div>
 
     <div class="card">
       <h2>Section A — Declaration</h2>
       <div class="decl-row">
-        <span>1. The nominated students are final-year students requiring industrial attachment</span>
+        <span>1. All the nominated students require official industrial attachment/internship to graduate</span>
         <select id="declFinalYear"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
       </div>
       <div class="decl-row">
-        <span>2. The students will be available for the full internship period (September–December 2026)</span>
+        <span>2. The students will be available for the full internship period (September – 31 December 2026) and have no classes during this period</span>
         <select id="declAvailability"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
       </div>
       <div class="decl-row">
-        <span>3. The student is aware and understands that this is an unpaid internship</span>
+        <span>3. The Institution and the student are aware and understands that this is an unpaid internship</span>
         <select id="declUnpaid"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
+      </div>
+      <div class="decl-row">
+        <span>4. The student commits to uphold and respect the RMS code of conduct, the RMS guidelines and procedures, as well as the rules and regulations at all times while engaged with RMS</span>
+        <select id="declCodeOfConduct"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
       </div>
     </div>
 
     <div class="card">
       <h2>Section B — Student Nominations</h2>
-      <p style="font-size:12.5px;color:var(--muted)">Maximum 10 students; minimum 4 for vernacular media placements. Attach a CV (PDF or Word, max <span id="maxCvSize">5</span>MB) for each student if available.</p>
+      <p style="font-size:12.5px;color:var(--muted)">Nominate up to a maximum 10 students; minimum 4 for vernacular media placements. Attach a CV (PDF or Word, max <span id="maxCvSize">5</span>MB) for each student if available.</p>
 
+      <p style="font-size:12.5px;color:var(--muted)">Use the excel template below to upload the list of nominated students. Alternatively, key in their details in the form below.</p>
       <div class="toolbar" style="margin-bottom:14px">
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
           <button class="ghost" id="uploadExcelBtn" type="button">Upload from Excel</button>
           <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none">
-          <span style="font-size:11.5px;color:var(--muted)">Fills in the students below from an Excel file — review before submitting.</span>
         </div>
         <a href="Nomination-Form-Template.xlsx" download style="font-size:12.5px">Download Excel template</a>
       </div>
@@ -166,8 +192,8 @@ async function loadMeta() {
   const label = daysLeft < 0 ? `${Math.abs(daysLeft)} day(s) past deadline` : `${daysLeft} day(s) remaining`;
   document.getElementById('dateBar').innerHTML =
     `<div><b>Nomination deadline:</b> ${fmtDate(META.deadline)}</div>
-     <div><b>Interview date:</b> ${fmtDate(META.interviewDate)}</div>
-     <div class="days ${cls}"><b>${label}</b></div>`;
+     <div class="days ${cls}"><b>${label}</b></div>
+     <div><b>Interview date:</b> ${fmtDate(META.interviewDate)}</div>`;
 }
 
 function studentCardHtml(index) {
@@ -185,14 +211,18 @@ function studentCardHtml(index) {
       <div class="field"><label>Phone Number</label><input type="tel" class="s-phone"></div>
       <div class="field"><label>Email Address</label><input type="email" class="s-email"></div>
       <div class="field"><label>Year of Study</label><input type="text" class="s-year" placeholder="e.g. 4"></div>
-      <div class="field"><label>Department *</label>
+      <div class="field"><label>Course Undertaken</label><input type="text" class="s-course" placeholder="e.g. Bachelor of Journalism"></div>
+      <div class="field"><label>Departments at RMS *</label>
         <select class="s-dept" onchange="onDeptChange(${index})"><option value="">Select department</option>${deptOptions}</select>
       </div>
       <div class="field"><label>Area of Interest *</label>
-        <select class="s-area"><option value="">Select department first</option></select>
+        <select class="s-area" onchange="updateVernacularUI(${index})"><option value="">Select department first</option></select>
       </div>
       <div class="field"><label>Vernacular Placement?</label>
-        <select class="s-vern"><option value="No">No</option><option value="Yes">Yes</option></select>
+        <select class="s-vern" onchange="updateVernacularUI(${index})"><option value="No">No</option><option value="Yes">Yes</option></select>
+      </div>
+      <div class="field s-vern-lang-wrap" style="display:none"><label>Vernacular Language</label>
+        <select class="s-vern-lang"></select>
       </div>
       <div class="field"><label>CV (PDF or Word)</label><input type="file" class="s-cv" accept=".pdf,.doc,.docx"></div>
     </div>
@@ -207,6 +237,38 @@ function onDeptChange(index) {
   areaSel.innerHTML = dept
     ? '<option value="">Select area</option>' + dept.areas.map(a => `<option>${a}</option>`).join('')
     : '<option value="">Select department first</option>';
+  updateVernacularUI(index);
+}
+
+function updateVernacularUI(index) {
+  const card = document.querySelector(`.student-card[data-index="${index}"]`);
+  if (!card) return;
+  const dept = card.querySelector('.s-dept').value;
+  const area = card.querySelector('.s-area').value;
+  const vernSel = card.querySelector('.s-vern');
+  const langWrap = card.querySelector('.s-vern-lang-wrap');
+  const langSel = card.querySelector('.s-vern-lang');
+  const rules = META.vernacularRules;
+
+  const tvAreaLang = rules.TV_VERNACULAR_AREA_LANGUAGE[area];
+  const isTvVernacular = rules.TV_VERNACULAR_DEPARTMENTS.includes(dept) && tvAreaLang;
+
+  if (isTvVernacular) {
+    vernSel.value = 'Yes';
+    langWrap.style.display = '';
+    const langs = Array.from(new Set(Object.values(rules.TV_VERNACULAR_AREA_LANGUAGE)));
+    langSel.innerHTML = '<option value="">Select language</option>' + langs.map(l => `<option>${l}</option>`).join('');
+    langSel.value = tvAreaLang;
+  } else if (rules.RADIO_DIGITAL_VERNACULAR_DEPARTMENTS.includes(dept) && vernSel.value === 'Yes') {
+    langWrap.style.display = '';
+    const prev = langSel.value;
+    langSel.innerHTML = '<option value="">Select language</option>' + rules.RADIO_DIGITAL_VERNACULAR_LANGUAGES.map(l => `<option>${l}</option>`).join('');
+    langSel.value = rules.RADIO_DIGITAL_VERNACULAR_LANGUAGES.includes(prev) ? prev : '';
+  } else {
+    langWrap.style.display = 'none';
+    langSel.innerHTML = '';
+  }
+  updateSummary();
 }
 
 function addStudent() {
@@ -235,9 +297,11 @@ function collectStudents() {
     phone: card.querySelector('.s-phone').value.trim(),
     email: card.querySelector('.s-email').value.trim(),
     year: card.querySelector('.s-year').value.trim(),
+    course: card.querySelector('.s-course').value.trim(),
     department: card.querySelector('.s-dept').value,
     area: card.querySelector('.s-area').value,
     vernacular: card.querySelector('.s-vern').value,
+    vernacularLanguage: card.querySelector('.s-vern-lang').value,
     cvInput: card.querySelector('.s-cv'),
   })).filter(s => s.name);
 }
@@ -274,6 +338,7 @@ const EXCEL_HEADER_MAP = {
   'phone number': 'phone',
   'email address': 'email',
   'year of study': 'year',
+  'course': 'course',
   'department': 'department',
   'area of interest': 'area',
 };
@@ -324,16 +389,17 @@ function parseNominationWorkbook(arrayBuffer) {
       headerRowIdx = i;
       norm.forEach((h, idx) => {
         const cleaned = h.replace(/\s+/g, ' ').trim();
+        if (cleaned.startsWith('vernacular language')) { colIndex.vernacularLanguage = idx; return; }
+        if (cleaned.startsWith('vernacular')) { colIndex.vernacular = idx; return; }
         for (const key in EXCEL_HEADER_MAP) {
           if (cleaned.startsWith(key)) colIndex[EXCEL_HEADER_MAP[key]] = idx;
         }
-        if (cleaned.startsWith('vernacular')) colIndex.vernacular = idx;
       });
       break;
     }
   }
   if (headerRowIdx === -1 || colIndex.name === undefined) {
-    throw new Error('Could not find a "Full Name" column. Make sure you are uploading the Section C student table from the nomination template.');
+    throw new Error('Could not find a "Full Name" column. Make sure you are uploading the Section B student table from the nomination template.');
   }
 
   const students = [];
@@ -347,6 +413,7 @@ function parseNominationWorkbook(arrayBuffer) {
     const vernR = excelNormVernacular(row[colIndex.vernacular]);
     const deptR = excelMatchDepartment(row[colIndex.department]);
     const areaR = excelMatchArea(deptR.dept, row[colIndex.area]);
+    const vernLang = colIndex.vernacularLanguage !== undefined ? String(row[colIndex.vernacularLanguage] || '').trim() : '';
 
     if (!genderR.ok) warnings.push(`"${name}": gender "${genderR.raw}" not recognised — select manually.`);
     if (!vernR.ok) warnings.push(`"${name}": vernacular value "${vernR.raw}" not recognised — defaulted to No, check manually.`);
@@ -360,9 +427,11 @@ function parseNominationWorkbook(arrayBuffer) {
       phone: String(row[colIndex.phone] || '').trim(),
       email: String(row[colIndex.email] || '').trim(),
       year: String(row[colIndex.year] || '').trim(),
+      course: colIndex.course !== undefined ? String(row[colIndex.course] || '').trim() : '',
       department: deptR.dept ? deptR.dept.name : String(row[colIndex.department] || '').trim(),
       area: areaR.value,
       vernacular: vernR.value,
+      vernacularLanguage: vernLang,
     });
   }
   if (!students.length) {
@@ -379,6 +448,7 @@ function fillStudentCard(index, data) {
   card.querySelector('.s-phone').value = data.phone || '';
   card.querySelector('.s-email').value = data.email || '';
   card.querySelector('.s-year').value = data.year || '';
+  card.querySelector('.s-course').value = data.course || '';
 
   const genderSel = card.querySelector('.s-gender');
   if (data.gender) genderSel.value = data.gender;
@@ -409,6 +479,20 @@ function fillStudentCard(index, data) {
   }
 
   card.querySelector('.s-vern').value = data.vernacular || 'No';
+  updateVernacularUI(index);
+
+  if (data.vernacularLanguage) {
+    const langSel = card.querySelector('.s-vern-lang');
+    const hasLangOption = Array.from(langSel.options).some(o => o.value === data.vernacularLanguage);
+    if (!hasLangOption) {
+      card.querySelector('.s-vern-lang-wrap').style.display = '';
+      const opt = document.createElement('option');
+      opt.value = data.vernacularLanguage;
+      opt.textContent = data.vernacularLanguage + ' (not in list — check manually)';
+      langSel.appendChild(opt);
+    }
+    langSel.value = data.vernacularLanguage;
+  }
 }
 
 function showImportMsg(text, ok) {
@@ -464,6 +548,11 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
   fd.append('declarationFinalYear', document.getElementById('declFinalYear').value);
   fd.append('declarationAvailability', document.getElementById('declAvailability').value);
   fd.append('declarationUnpaid', document.getElementById('declUnpaid').value);
+  fd.append('declarationCodeOfConduct', document.getElementById('declCodeOfConduct').value);
+  fd.append('hodName', document.getElementById('hodName').value.trim());
+  fd.append('hodTitle', document.getElementById('hodTitle').value.trim());
+  fd.append('hodPhone', document.getElementById('hodPhone').value.trim());
+  fd.append('hodEmail', document.getElementById('hodEmail').value.trim());
 
   const studentsPayload = students.map(({ cvInput, ...rest }) => rest);
   fd.append('studentsJson', JSON.stringify(studentsPayload));

@@ -38,7 +38,7 @@ router.get('/dashboard', requireRole('hr', 'admin'), async (req, res) => {
   const underVernacular = perInstitution.rows.filter(r => (r.vernacular_count || 0) < 4).length;
 
   res.json({
-    deadline: '2026-07-19',
+    deadline: '2026-07-25',
     interviewDate: '2026-08-07',
     institutionsCount: institutionsCount.rows[0].n,
     studentsCount: studentsCount.rows[0].n,

@@ -4,11 +4,13 @@ module.exports = [
     "Mulembe FM","Wimwaro FM","Bahari FM","Vuuka FM","Sulwe FM"] },
   { name: "TV Production", areas: [
     "Video Editing","Creative","Graphic Design","Library","Programming (Traffic Control)",
-    "Promo Production","TV Directing","Production Assistant","VIUSASA","Traffic Control"] },
+    "Promo Production","TV Directing","Production Assistant","VIUSASA","Traffic Control",
+    "Inooro TV","Ramogi TV"] },
   { name: "Digital", areas: [
     "Social Media Management","Video Production","Website Writing"] },
   { name: "Editorial", areas: [
-    "News Reporting (TV)","News Reporting (Radio)","Sports Journalism"] },
+    "News Reporting (TV)","News Reporting (Radio)","Sports Journalism",
+    "Inooro TV","Ramogi TV"] },
   { name: "Technical Site", areas: [
     "Electrical Engineering","Electronics","Telecommunication / Broadcast Engineering"] },
   { name: "Studio Technical Operations (STO)", areas: [

@@ -29,7 +29,8 @@ router.post('/nominations', requireRole('facilitator'), upload.any(), async (req
   const client = await pool.connect();
   try {
     const { studentsJson,
-      declarationFinalYear, declarationAvailability, declarationUnpaid } = req.body;
+      declarationFinalYear, declarationAvailability, declarationUnpaid, declarationCodeOfConduct,
+      hodName, hodTitle, hodPhone, hodEmail } = req.body;
     const officerName = req.user.fullName;
     const institutionName = req.user.institutionName;
     const officerEmail = req.user.email;
@@ -66,9 +67,11 @@ router.post('/nominations', requireRole('facilitator'), upload.any(), async (req
       await client.query(
         `UPDATE institutions SET officer_name=$1, officer_email=$2, officer_phone=$3,
          declaration_final_year=$4, declaration_availability=$5, declaration_unpaid=$6,
-         updated_at=now() WHERE id=$7`,
+         declaration_code_of_conduct=$7, hod_name=$8, hod_title=$9, hod_phone=$10, hod_email=$11,
+         updated_at=now() WHERE id=$12`,
         [officerName, officerEmail, officerPhone,
          isYes(declarationFinalYear), isYes(declarationAvailability), isYes(declarationUnpaid),
+         isYes(declarationCodeOfConduct), hodName || '', hodTitle || '', hodPhone || '', hodEmail || '',
          institutionId]
       );
       await client.query('DELETE FROM students WHERE institution_id=$1', [institutionId]);
@@ -76,10 +79,12 @@ router.post('/nominations', requireRole('facilitator'), upload.any(), async (req
       const ins = await client.query(
         `INSERT INTO institutions
          (name, officer_name, officer_email, officer_phone,
-          declaration_final_year, declaration_availability, declaration_unpaid)
-         VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
+          declaration_final_year, declaration_availability, declaration_unpaid, declaration_code_of_conduct,
+          hod_name, hod_title, hod_phone, hod_email)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
         [institutionName, officerName, officerEmail, officerPhone,
-         isYes(declarationFinalYear), isYes(declarationAvailability), isYes(declarationUnpaid)]
+         isYes(declarationFinalYear), isYes(declarationAvailability), isYes(declarationUnpaid),
+         isYes(declarationCodeOfConduct), hodName || '', hodTitle || '', hodPhone || '', hodEmail || '']
       );
       institutionId = ins.rows[0].id;
     }
@@ -93,11 +98,12 @@ router.post('/nominations', requireRole('facilitator'), upload.any(), async (req
       await client.query(
         `INSERT INTO students
          (institution_id, full_name, gender, national_id, phone, email, year_of_study,
-          department, area_of_interest, vernacular, cv_filename, cv_mimetype, cv_data, cv_size_bytes)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+          department, area_of_interest, course, vernacular, vernacular_language,
+          cv_filename, cv_mimetype, cv_data, cv_size_bytes)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
         [institutionId, s.name.trim(), s.gender || '', s.nationalId || '', s.phone || '',
-         s.email || '', s.year || '', s.department || '', s.area || '',
-         isYes(s.vernacular),
+         s.email || '', s.year || '', s.department || '', s.area || '', s.course || '',
+         isYes(s.vernacular), s.vernacularLanguage || '',
          file ? file.originalname : null,
          file ? file.mimetype : null,
          file ? file.buffer : null,
@@ -129,6 +135,7 @@ router.post('/nominations', requireRole('facilitator'), upload.any(), async (req
 router.get('/institutions', requireRole('hr', 'admin'), async (req, res) => {
   const { rows } = await pool.query(`
     SELECT i.id, i.name, i.officer_name, i.officer_email, i.officer_phone,
+           i.hod_name, i.hod_title, i.hod_phone, i.hod_email,
            i.interview_status, i.notes, i.submitted_at,
            COUNT(s.id)::int AS students_count,
            SUM(CASE WHEN s.vernacular THEN 1 ELSE 0 END)::int AS vernacular_count,
@@ -136,6 +143,7 @@ router.get('/institutions', requireRole('hr', 'admin'), async (req, res) => {
     FROM institutions i
     LEFT JOIN students s ON s.institution_id = i.id
     GROUP BY i.id, i.name, i.officer_name, i.officer_email, i.officer_phone,
+             i.hod_name, i.hod_title, i.hod_phone, i.hod_email,
              i.interview_status, i.notes, i.submitted_at
     ORDER BY i.name ASC
   `);

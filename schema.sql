@@ -63,3 +63,17 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_email_lower ON users (lower(email));
+
+-- Dean / Head of Department contact for the institution, and the fourth
+-- declaration (code of conduct). Added via ALTER so this is safe to re-run
+-- against a database that already has the institutions table.
+ALTER TABLE institutions ADD COLUMN IF NOT EXISTS hod_name TEXT;
+ALTER TABLE institutions ADD COLUMN IF NOT EXISTS hod_title TEXT;
+ALTER TABLE institutions ADD COLUMN IF NOT EXISTS hod_phone TEXT;
+ALTER TABLE institutions ADD COLUMN IF NOT EXISTS hod_email TEXT;
+ALTER TABLE institutions ADD COLUMN IF NOT EXISTS declaration_code_of_conduct BOOLEAN NOT NULL DEFAULT false;
+
+-- Course undertaken by the student, and the specific vernacular language
+-- (when applicable), added the same way.
+ALTER TABLE students ADD COLUMN IF NOT EXISTS course TEXT;
+ALTER TABLE students ADD COLUMN IF NOT EXISTS vernacular_language TEXT;
