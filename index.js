@@ -3,6 +3,22 @@ const express = require('express');
 const path = require('path');
 
 const app = express();
+
+// Behind Nginx + Cloudflare — trust the proxy chain so req.protocol reflects the real client request
+app.set('trust proxy', true);
+
+const CANONICAL_HOST = 'internships.royalmedia.co.ke';
+
+// The app is only "live" at https://internships.royalmedia.co.ke. Anything that arrives via
+// the bare server IP, any other hostname, or plain HTTP gets redirected here.
+app.use((req, res, next) => {
+  const host = (req.headers.host || '').split(':')[0];
+  if (host !== CANONICAL_HOST || req.protocol !== 'https') {
+    return res.redirect(301, `https://${CANONICAL_HOST}${req.originalUrl}`);
+  }
+  next();
+});
+
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 
