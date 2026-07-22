@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RMS Internships — Nomination</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#101a1c; --fg:#ffffff; --sub:#aeb8ba; --muted:#7d8c8f;
+    --orange:#f58320; --green:#a4ce39;
+    --hairline:rgba(255,255,255,.1); --hairline-soft:rgba(255,255,255,.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{background:var(--bg);color:var(--fg);font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased;}
+  a{text-decoration:none;color:inherit;}
+  a:hover{filter:brightness(.92);}
+
+  .page{position:relative;width:100%;min-height:100vh;background:var(--bg);overflow:hidden;display:flex;flex-direction:column;}
+  .glow{position:absolute;pointer-events:none;filter:blur(20px);width:560px;height:560px;}
+  .glow-1{top:-160px;right:-120px;background:radial-gradient(circle,rgba(245,131,32,.32),transparent 62%);}
+  .glow-2{bottom:-200px;left:-140px;background:radial-gradient(circle,rgba(164,206,57,.22),transparent 64%);}
+
+  /* nav */
+  .nav{position:relative;display:flex;align-items:center;justify-content:space-between;padding:24px 56px;border-bottom:1px solid var(--hairline-soft);}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{display:flex;align-items:center;justify-content:center;width:40px;height:40px;background:var(--orange);color:#fff;border-radius:11px;font-weight:700;font-size:18px;letter-spacing:-.03em;}
+  .brand-text{display:flex;flex-direction:column;line-height:1.1;}
+  .brand-kicker{font-size:12px;letter-spacing:.22em;color:var(--muted);font-weight:600;}
+  .brand-title{font-size:18px;font-weight:700;}
+  .nav-links{display:flex;align-items:center;gap:32px;font-size:16px;color:var(--sub);font-weight:500;}
+  .nav-logo img{height:42px;width:auto;display:block;}
+
+  /* hero */
+  .hero{position:relative;flex:1;padding:80px 56px 64px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+  .badge{display:inline-flex;align-items:center;gap:9px;padding:8px 16px;border:1px solid rgba(164,206,57,.4);border-radius:999px;font-size:15px;font-weight:600;color:var(--green);margin-bottom:26px;}
+  .badge-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(164,206,57,.18);}
+  .hero h1{margin:0;font-size:68px;line-height:1.02;font-weight:700;letter-spacing:-.03em;max-width:960px;}
+  .hero h1 .hl{color:var(--orange);}
+  .hero p{margin:26px 0 0;font-size:21px;line-height:1.6;color:var(--sub);max-width:720px;}
+  .cta{display:flex;gap:14px;margin-top:38px;flex-wrap:wrap;justify-content:center;}
+  .btn-primary{display:inline-flex;align-items:center;gap:9px;padding:16px 30px;background:var(--orange);color:#fff;font-weight:700;font-size:18px;border-radius:12px;box-shadow:0 16px 30px -12px rgba(245,131,32,.6);}
+  .btn-ghost{display:inline-flex;align-items:center;padding:16px 28px;border:1px solid rgba(255,255,255,.22);color:#fff;font-weight:600;font-size:18px;border-radius:12px;}
+
+  .facts{display:flex;align-items:stretch;margin-top:40px;border:1px solid var(--hairline);border-radius:14px;overflow:hidden;}
+  .fact{padding:16px 28px;text-align:left;}
+  .fact-label{font-size:13px;letter-spacing:.14em;color:var(--muted);font-weight:600;}
+  .fact-value{font-size:21px;font-weight:700;margin-top:5px;}
+  .fact-value.accent{color:var(--green);}
+  .fact-div{width:1px;background:var(--hairline);}
+
+  /* how it works */
+  .howto{position:relative;padding:64px 56px;border-top:1px solid var(--hairline-soft);}
+  .howto-kicker{margin:0;text-align:center;font-size:14px;letter-spacing:.2em;color:var(--muted);font-weight:600;}
+  .howto-title{margin:10px 0 40px;text-align:center;font-size:34px;font-weight:700;letter-spacing:-.02em;}
+  .howto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1080px;margin:0 auto;}
+  .howto-step{position:relative;padding:24px 22px 22px;border:1px solid var(--hairline);border-radius:14px;background:rgba(255,255,255,.02);}
+  .howto-num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:var(--orange);color:#fff;border-radius:9px;font-weight:700;font-size:16px;margin-bottom:14px;}
+  .howto-step h3{margin:0 0 8px;font-size:18px;font-weight:700;}
+  .howto-step p{margin:0;font-size:15.5px;line-height:1.55;color:var(--sub);}
+
+  @media (max-width:720px){
+    .howto{padding:48px 22px;} .howto-title{font-size:26px;} .howto-grid{grid-template-columns:1fr;}
+  }
+
+  /* marquee */
+  .marquee-wrap{position:relative;padding:26px 0 34px;border-top:1px solid var(--hairline-soft);background:rgba(255,255,255,.02);}
+  .marquee-label{margin:0 0 20px;text-align:center;font-size:14px;letter-spacing:.2em;color:var(--muted);font-weight:600;}
+  .marquee{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);}
+  .marquee-track{display:flex;align-items:center;gap:26px;width:max-content;animation:rmsMarquee 55s linear infinite;}
+  .marquee-track img{height:98px;width:auto;flex:none;}
+  @keyframes rmsMarquee{to{transform:translateX(-50%);}}
+
+  .staging-badge{position:fixed;bottom:14px;right:14px;z-index:99999;background:#ff6b6b;color:#101a1c;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;letter-spacing:.14em;padding:6px 14px;border-radius:8px;box-shadow:0 8px 20px -6px rgba(0,0,0,.6);pointer-events:none;}
+
+  @media (max-width:720px){
+    .nav{padding:18px 22px;} .nav-links{display:none;}
+    .hero{padding:56px 22px 48px;} .hero h1{font-size:42px;} .hero p{font-size:18px;}
+    .facts{flex-direction:column;} .fact-div{width:auto;height:1px;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+
+  <nav class="nav">
+    <a class="nav-logo" href="login.html"><img src="assets/citizen-logo.png" alt="Citizen Television"></a>
+    <div class="nav-links">
+      <a href="#how-it-works">How it works</a><a href="#">FAQ</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <span class="badge"><span class="badge-dot"></span>September–December 2026 cohort · nominations open</span>
+    <h1>Launch your <span class="hl">media career</span> where Kenya tunes in.</h1>
+    <p>Royal Media Services runs a structured four-month internship across Kenya's biggest TV, radio and digital brands. Nominations are submitted by authorised Placement Officers on behalf of their institutions.</p>
+    <div class="cta">
+      <a class="btn-primary" href="login.html">Placement Officer Login →</a>
+      <a class="btn-ghost" href="login.html">Register your institution</a>
+    </div>
+    <div class="facts">
+      <div class="fact"><div class="fact-label">NOMINATIONS CLOSE</div><div class="fact-value">25 July 2026</div></div>
+      <div class="fact-div"></div>
+      <div class="fact"><div class="fact-label">COHORT</div><div class="fact-value">Sep – Dec 2026</div></div>
+      <div class="fact-div"></div>
+      <div class="fact"><div class="fact-label">INTERVIEWS</div><div class="fact-value accent">07 Aug 2026</div></div>
+    </div>
+  </div>
+
+  <div class="howto" id="how-it-works">
+    <p class="howto-kicker">HOW IT WORKS</p>
+    <h2 class="howto-title">Get your nominations in, in six steps</h2>
+    <div class="howto-grid">
+      <div class="howto-step">
+        <span class="howto-num">1</span>
+        <h3>Register your institution</h3>
+        <p>Create a placement-officer account using your institution email address.</p>
+      </div>
+      <div class="howto-step">
+        <span class="howto-num">2</span>
+        <h3>Verify your email</h3>
+        <p>Open the verification link we send you, then log in with your new password.</p>
+      </div>
+      <div class="howto-step">
+        <span class="howto-num">3</span>
+        <h3>Review the cohort details</h3>
+        <p>Check the Background section for eligibility rules, key dates and the nomination limit.</p>
+      </div>
+      <div class="howto-step">
+        <span class="howto-num">4</span>
+        <h3>Add your institution details</h3>
+        <p>Enter your Dean or HOD's name, job title, phone and email, then complete the declarations.</p>
+      </div>
+      <div class="howto-step">
+        <span class="howto-num">5</span>
+        <h3>Nominate your students</h3>
+        <p>Add up to 10 students one by one, or upload the Excel template. At least 4 must be vernacular media placements.</p>
+      </div>
+      <div class="howto-step">
+        <span class="howto-num">6</span>
+        <h3>Submit before the deadline</h3>
+        <p>Confirm your declarations and submit by 25 July 2026. Shortlisted candidates are contacted for interviews on 07 August 2026.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="marquee-wrap">
+    <p class="marquee-label">INTERN ACROSS OUR FAMILY OF BRANDS</p>
+    <div class="marquee">
+      <div class="marquee-track" id="track"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var LOGOS = [
+    ['assets/citizen-tv.png','Citizen TV'],['assets/radio-citizen.png','Radio Citizen'],
+    ['assets/hot96.png','Hot 96'],['assets/inooro-tv.png','Inooro TV'],
+    ['assets/inooro-fm.png','Inooro FM'],['assets/ramogi-tv.png','Ramogi TV'],
+    ['assets/ramogi-fm.png','Ramogi FM'],['assets/citizen-digital.png','Citizen Digital'],
+    ['assets/egesa.png','Egesa FM'],['assets/mulembe.png','Mulembe FM'],
+    ['assets/musyi.png','Musyi FM'],['assets/muuga.png','Muuga FM'],
+    ['assets/chamgei.png','Chamgei FM'],['assets/radio-maa.png','Radio Maa'],
+    ['assets/sulwe.png','Sulwe FM'],['assets/wimwaro.png','Wimwaro FM'],
+    ['assets/vuuka.png','Vuuka FM'],['assets/bahari.png','Bahari FM'],
+    ['assets/bilito.png','Bilito FM'],['assets/magalata.png','Magalata FM'],
+    ['assets/viusasa.png','Viusasa'],['assets/citizen-duka.png','Citizen Duka']
+  ];
+  var track = document.getElementById('track');
+  // duplicate the set so the -50% loop is seamless
+  LOGOS.concat(LOGOS).forEach(function(l){
+    var img = document.createElement('img');
+    img.src = l[0]; img.alt = l[1];
+    track.appendChild(img);
+  });
+
+  // Staging indicator — only appears when the server reports a non-production environment
+  fetch('/api/meta').then(function(r){ return r.json(); }).then(function(m){
+    if (m && m.environment === 'staging') {
+      var b = document.createElement('div');
+      b.className = 'staging-badge';
+      b.textContent = 'STAGING';
+      document.body.appendChild(b);
+    }
+  }).catch(function(){});
+</script>
+</body>
+</html>
